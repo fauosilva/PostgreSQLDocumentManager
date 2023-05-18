@@ -1,4 +1,4 @@
-# PostgreSQLDocumentManager
+# PostgreSQL Document Manager
 
 
 ## Architecture Decisions
@@ -22,3 +22,22 @@
 1. C# string -> PostgreSQL text data type
 	1. This choice of database collumn type was made since restricting the size of the collumns on the database is a little bit less performatic.
 	[Link](https://www.postgresql.org/docs/current/datatype-character.html)
+
+---
+
+## Running the project
+
+### Local
+ 
+ - Requirements
+	- docker-compose
+ - Instructions
+    - Open the project using your favorit terminal
+	- Execute docker-compose to create a new container with the PostgreSQL database
+	  - Wait for the compose to finish
+	- Execute the project using dotnet run OR start the project using your favorite IDE.
+
+## Development Environment
+
+- Public URL
+
