@@ -36,6 +36,7 @@ namespace Application.Services
                 {
                     Id = user.Id,
                     Password = user.Password,
+                    Role = user.Role,
                     InsertedAt = user.InsertedAt,
                     InsertedBy = user.InsertedBy,
                     UpdatedAt = user.UpdatedAt,

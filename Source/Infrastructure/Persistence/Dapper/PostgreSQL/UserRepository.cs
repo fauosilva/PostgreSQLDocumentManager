@@ -21,18 +21,14 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "INSERT INTO users(username, password, inserted_at, inserted_by) VALUES(@Username, @Password, @InsertedAt, @InsertedBy)";
-            //Todo: Replace with a stored procedure with audit functionality.
+            string sql = "INSERT INTO users(username, password, role, inserted_at, inserted_by) VALUES(@Username, @Password, @Role, @InsertedAt, @InsertedBy)";
             var parameters = new { entity.Username, entity.Password, InsertedAt = DateTime.UtcNow, InsertedBy = "Sample"};
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
             var affectedRecords = await connection.ExecuteAsync(command);
 
             logger.LogDebug("Affected Records {affectedRecords}", affectedRecords);
 
-            return entity;
-
-            //var createdUser = await connection.QueryFirstAsync<User>("AddUser",commandType: CommandType.StoredProcedure);
-            //return createdUser;
+            return entity;            
         }
 
         public Task<int> DeleteAsync(User entity, CancellationToken cancellationToken = default)
