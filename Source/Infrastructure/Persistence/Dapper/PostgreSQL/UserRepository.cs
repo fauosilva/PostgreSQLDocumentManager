@@ -21,12 +21,11 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "INSERT INTO Users(Username, Password, InsertedAt, InsertedBy, UpdatedAt, UpdatedBy) VALUES(@Username, @Password, @InsertedAt, @InsertedBy)";            
-            
+            string sql = "INSERT INTO users(username, password, inserted_at, inserted_by) VALUES(@Username, @Password, @InsertedAt, @InsertedBy)";
             //Todo: Replace with a stored procedure with audit functionality.
             var parameters = new { entity.Username, entity.Password, InsertedAt = DateTime.UtcNow, InsertedBy = "Sample"};
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
-            var affectedRecords = connection.ExecuteAsync(command);
+            var affectedRecords = await connection.ExecuteAsync(command);
 
             logger.LogDebug("Affected Records {affectedRecords}", affectedRecords);
 

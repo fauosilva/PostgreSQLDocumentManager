@@ -32,7 +32,7 @@
  - Requirements
 	- docker-compose
  - Instructions
-    - Open the project using your favorit terminal
+    - Open the project using your favorite terminal
 	- Execute docker-compose to create a new container with the PostgreSQL database
 	  - Wait for the compose to finish
 	- Execute the project using dotnet run OR start the project using your favorite IDE.
