@@ -4,18 +4,21 @@
 ## Architecture Decisions
 
 1. Onion Architecture
-	1. Due to the relative simplicity of the features implemented on the project a simple flavor of the Onion Architecture was used on this project
+	1. Due to the relative simplicity of the features implemented on the project a simple flavor of the Onion Architecture was used.
 2. Domain 
 	1. DDD was not implemented along the Onion Structure and an anemic model was built for this project. To invert this decision all the authorization logic and business rules should be migrated from the Application and Service layer to the domain, along with other adjusts to comply with DDD best-pratices.
-	2. All entities that are persisted on the database can implement simple in-table audit fields.
-3. Application / Controllers
-    1. Used automapper to simplify mapping code for the service layer
-	2. Input validation was implemented using data annotations for on the request Dtos.
-	3. Input lenght was considered input validation and not a business logic for this project.
-	4. Business logic validations was implemented on the service layer.
-	5. Authorization logic was implemented on the controller layer.
-4. Infrastructure
-	1. In-table audit fields where implemented using stored procedures.
+	2. All entities that are persisted on the database are implementing simple in-table audit fields.
+3. Validation logic
+	1. Input validation was implemented using data annotations on the request Dtos.
+		1. Input lenght and other simple validations were considered input validation and not a business logic for this project.
+	3. Business logic validations were implemented on the service layer.
+	4. Authorization logic was implemented on the controller layer.
+4. Controllers
+5. Services
+	1. Single database operations using the repository layer are not using the transaction block, or unit of work pattern since PostgreSQL MVCC actually handle those statements into a implicit transaction.
+6. Infrastructure
+
+
 
 ## Database decisions
 

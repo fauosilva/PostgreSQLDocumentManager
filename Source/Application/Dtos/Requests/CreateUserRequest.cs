@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Dtos.Requests
+namespace ApplicationCore.Dtos.Requests
 {
     public class CreateUserRequest
     {
@@ -9,7 +9,7 @@ namespace Application.Dtos.Requests
         [MaxLength(255)]
         [MinLength(4)]
         public string Username { get; set; }
-        
+
         [Required]
         [MaxLength(255)]
         [MinLength(8)]

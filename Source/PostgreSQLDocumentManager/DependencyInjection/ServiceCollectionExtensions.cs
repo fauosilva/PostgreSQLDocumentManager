@@ -1,6 +1,7 @@
-﻿using Application.Interfaces;
-using Application.Services;
-using Domain.Interfaces;
+﻿using ApplicationCore.Interfaces;
+using ApplicationCore.Interfaces.Services;
+using ApplicationCore.Services;
+using Infrastructure.Password;
 using Infrastructure.Persistence.Dapper.PostgreSQL;
 using Npgsql;
 using System.Data.Common;
@@ -28,6 +29,10 @@ namespace PostgreSQLDocumentManager.DependencyInjection
             var npgSqlDataSource = npgsqlDataSourceBuilder.Build();
 
             services.AddSingleton<DbDataSource>(npgSqlDataSource);
+
+
+            services.AddScoped<IPasswordVerificationService, PasswordVerificationService>();
+            services.AddScoped<IHashPasswordService, HashPasswordService>();
         }
 
     }

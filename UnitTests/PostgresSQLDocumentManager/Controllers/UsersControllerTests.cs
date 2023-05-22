@@ -1,5 +1,5 @@
-﻿using Application.Dtos.Requests;
-using Application.Interfaces;
+﻿using ApplicationCore.Dtos.Requests;
+using ApplicationCore.Interfaces.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

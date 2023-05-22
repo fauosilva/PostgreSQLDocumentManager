@@ -13,7 +13,7 @@ CREATE TABLE users (
     inserted_by TEXT NOT NULL,
     updated_at TIMESTAMPTZ NULL,
     updated_by TEXT NULL,
-	CHECK (role IN ('admin', 'manager', 'user'))
+	CHECK (role IN ('Admin', 'Manager', 'User'))
 );
 
 CREATE TABLE groups (
@@ -63,7 +63,7 @@ CREATE TABLE document_permissions (
 
 -- Seed Data
  
- INSERT INTO users(username, password, role, inserted_by) VALUES ('adminuser', 'AJub08dIVXIQOmdvnY7jJpoz74/a9gNPbYwAXq7K9TYrWbT8GcU2CBZ2hL6Qu/s4iA==', 'admin', 'seed');
+ INSERT INTO users(username, password, role, inserted_by) VALUES ('adminuser', 'AJub08dIVXIQOmdvnY7jJpoz74/a9gNPbYwAXq7K9TYrWbT8GcU2CBZ2hL6Qu/s4iA==', 'Admin', 'seed');
  
  INSERT INTO groups(name, inserted_by) VALUES ('group1', 'seed');
  INSERT INTO groups(name, inserted_by) VALUES ('group2', 'seed');

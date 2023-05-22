@@ -1,11 +1,11 @@
-﻿using Application.Dtos.Requests;
-using Application.Dtos.Responses;
-using Application.Interfaces;
+﻿using ApplicationCore.Dtos.Requests;
+using ApplicationCore.Dtos.Responses;
+using ApplicationCore.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PostgreSQLDocumentManager.Controllers
 {
-    [Route("api/[controller]")]    
+    [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -20,7 +20,8 @@ namespace PostgreSQLDocumentManager.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(CreateUserResponse), 200)]
-        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        [ProducesResponseType(typeof(ProblemDetails), 400)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
         public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest)
         {
             if (!ModelState.IsValid)
@@ -29,6 +30,28 @@ namespace PostgreSQLDocumentManager.Controllers
             }
 
             var createdUser = await userService.CreateUserAsync(createUserRequest);
+            return Ok(createdUser);
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(typeof(UpdateUserResponse), 200)]
+        [ProducesResponseType(typeof(ProblemDetails), 400)]
+        [ProducesResponseType(typeof(ProblemDetails), 404)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest updateUserRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var createdUser = await userService.UpdateUserAsync(id, updateUserRequest);
+            if(createdUser == null)
+            {
+                logger.LogDebug("Attempt to update non-existing user id: {id}.", id);
+                return NotFound();
+            }
+
             return Ok(createdUser);
         }
     }

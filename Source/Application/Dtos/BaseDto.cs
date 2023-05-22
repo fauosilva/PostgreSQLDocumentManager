@@ -1,7 +1,7 @@
-﻿namespace Application.Dtos
+﻿namespace ApplicationCore.Dtos
 {
-    public record BaseDto<T>
+    public record BaseDto<TKey> where TKey : notnull
     {
-        public T Id { get; set; }
+        public TKey Id { get; set; } = default!;        
     }
 }
