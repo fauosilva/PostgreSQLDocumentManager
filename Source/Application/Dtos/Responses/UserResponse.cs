@@ -2,9 +2,9 @@
 
 namespace ApplicationCore.Dtos.Responses
 {
-    public record UpdateUserResponse : AuditableEntityDto<int>
+    public record UserResponse : AuditableEntityDto<int>
     {
-        public UpdateUserResponse(User user)
+        public UserResponse(User user)
         {
             Id = user.Id;
             Username = user.Username;

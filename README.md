@@ -16,15 +16,18 @@
 4. Controllers
 5. Services
 	1. Single database operations using the repository layer are not using the transaction block, or unit of work pattern since PostgreSQL MVCC actually handle those statements into a implicit transaction.
-6. Infrastructure
-
-
+6. Repositories / Database
+	1. Database unique constraints are used to mantain integrity of the entities. 
 
 ## Database decisions
 
 1. C# string -> PostgreSQL text data type
 	1. This choice of database collumn type was made since restricting the size of the collumns on the database is a little bit less performatic.
 	[Link](https://www.postgresql.org/docs/current/datatype-character.html)
+2. Decided to use BCL Date types, despite NpgSQL recomending the utilization of NodaTime. [Link](https://www.npgsql.org/doc/types/nodatime.html?tabs=datasource)
+3. Not using ON CONFLICT to describe behaviors different than throwing exceptions on INSERT/UPDATE conflicts.
+    1. In case of concurrent operations violating unique database constraints, an 500 status code might be returned to the client due to the exception propagation. Those scenarios were not handled since they can be considered rare scenarios on this API.
+		1. Example: Two users attempting to be registered with the same username on the same instant.
 
 ---
 
@@ -44,3 +47,10 @@
 
 - Public URL
 
+
+--- 
+
+## Improvements
+
+- API Design
+	- [ ] Return list of entities using pagination.

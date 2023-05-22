@@ -18,41 +18,89 @@ namespace PostgreSQLDocumentManager.Controllers
             this.userService = userService;
         }
 
+        [HttpGet]
+        [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
+        {
+
+            using (logger.BeginScope(new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("TransactionId", "sample"),
+            }))
+            {
+                var user = await userService.GetUsersAsync(cancellationToken);
+
+                if (user == null)
+                    return NotFound();
+
+                return Ok(user);
+
+            }
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        public async Task<IActionResult> GetUser(int id, CancellationToken cancellationToken)
+        {
+            var user = await userService.GetUserAsync(id, cancellationToken);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user);
+        }
+
         [HttpPost]
         [ProducesResponseType(typeof(CreateUserResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
-        public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest)
+        public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var createdUser = await userService.CreateUserAsync(createUserRequest);
+            var createdUser = await userService.CreateUserAsync(createUserRequest, cancellationToken);
             return Ok(createdUser);
         }
 
         [HttpPatch("{id}")]
-        [ProducesResponseType(typeof(UpdateUserResponse), 200)]
+        [ProducesResponseType(typeof(UserResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
         [ProducesResponseType(typeof(ProblemDetails), 404)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
-        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest updateUserRequest)
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest updateUserRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var createdUser = await userService.UpdateUserAsync(id, updateUserRequest);
-            if(createdUser == null)
+            var createdUser = await userService.UpdateUserAsync(id, updateUserRequest, cancellationToken);
+            if (createdUser == null)
             {
-                logger.LogDebug("Attempt to update non-existing user id: {id}.", id);
+                logger.LogInformation("Attempt to update non-existing user id: {id}.", id);
                 return NotFound();
             }
 
             return Ok(createdUser);
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(ProblemDetails), 404)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await userService.DeleteUserAsync(id, cancellationToken);
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }

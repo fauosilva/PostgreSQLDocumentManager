@@ -25,7 +25,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
         {
             var connectionString = config.GetConnectionString("DocumentManager");
 
-            NpgsqlDataSourceBuilder npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             var npgSqlDataSource = npgsqlDataSourceBuilder.Build();
 
             services.AddSingleton<DbDataSource>(npgSqlDataSource);

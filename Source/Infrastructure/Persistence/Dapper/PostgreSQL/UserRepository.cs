@@ -51,7 +51,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "DELETE FROM users WHERE user.id = @id";
+            string sql = "DELETE FROM users WHERE id = @id";
             var parameters = new { id };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
@@ -73,6 +73,45 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
             string sql = "SELECT id, username, role, inserted_at, inserted_by, updated_at, updated_by FROM users WHERE id = @id";
             var parameters = new { id };
+            var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+
+            var selectedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<User?>(command), cancellationToken);
+            logger.LogDebug("Selected user {selectedRecord}", selectedRecord);
+            return selectedRecord;
+        }
+
+        /// <summary>
+        /// Return user data by id.
+        /// Returns null in case of non-existing entity
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<User?>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
+
+            string sql = "SELECT id, username, role, inserted_at, inserted_by, updated_at, updated_by FROM users";
+            var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+
+            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<User?>(command), cancellationToken);
+            logger.LogDebug("Returning {selectedRecord} users.", selectedRecords.Count());
+            return selectedRecords;
+        }
+
+        /// <summary>
+        /// Return user data by username.
+        /// Returns null in case of non-existing entity.
+        /// </summary>
+        /// <param name="">Username</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+        {
+            await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
+
+            string sql = "SELECT id, username, role, inserted_at, inserted_by, updated_at, updated_by FROM users WHERE username = @username";
+            var parameters = new { username };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var selectedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<User?>(command), cancellationToken);
