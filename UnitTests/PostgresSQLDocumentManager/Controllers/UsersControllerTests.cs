@@ -22,13 +22,14 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
         public async Task CreateUser_ShouldReturnBadRequest_WhenInvalidRequestParametersAreSent()
         {
             //Arrange
+            var cancellationToken = CancellationToken.None;
             var request = new CreateUserRequest() { Password = string.Empty, Username = string.Empty };
             var userService = new Mock<IUserService>();
             var controller = new UsersController(logger, userService.Object);
             controller.ModelState.AddModelError("Password", "Required");
 
             //Act            
-            IActionResult actionResult = await controller.CreateUser(request);
+            IActionResult actionResult = await controller.CreateUser(request, cancellationToken);
 
             //Assert
 

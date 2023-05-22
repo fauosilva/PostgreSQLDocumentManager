@@ -110,7 +110,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "SELECT id, username, role, inserted_at, inserted_by, updated_at, updated_by FROM users WHERE username = @username";
+            string sql = "SELECT id, username, password, role, inserted_at, inserted_by, updated_at, updated_by FROM users WHERE username = @username";
             var parameters = new { username };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 

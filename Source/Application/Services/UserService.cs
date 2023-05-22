@@ -21,7 +21,7 @@ namespace ApplicationCore.Services
         {
             this.logger = logger;
             this.userRepository = userRepository;
-            this.hashPasswordService = hashPasswordService;
+            this.hashPasswordService = hashPasswordService;            
         }
 
         public async Task<bool> DeleteUserAsync(int id, CancellationToken cancellationToken = default)
@@ -150,6 +150,6 @@ namespace ApplicationCore.Services
                 logger.LogError(ex, UnexpectedErrorOnUpdate);
                 throw new ServiceException(UnexpectedErrorOnUpdate, ex);
             }
-        }
+        }        
     }
 }

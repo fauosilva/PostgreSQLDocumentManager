@@ -52,5 +52,10 @@
 
 ## Improvements
 
+- Logs
+    - [ ] Improve log scopes
+	- [ ] Propagate log scopes from the controllers
 - API Design
 	- [ ] Return list of entities using pagination.
+- Security
+    - [ ] Rate limit on login requests based on origin.

@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
 using ApplicationCore.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PostgreSQLDocumentManager.Controllers
@@ -20,7 +21,10 @@ namespace PostgreSQLDocumentManager.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize]
         public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
         {
 
@@ -41,7 +45,10 @@ namespace PostgreSQLDocumentManager.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize]
         public async Task<IActionResult> GetUser(int id, CancellationToken cancellationToken)
         {
             var user = await userService.GetUserAsync(id, cancellationToken);
@@ -55,7 +62,10 @@ namespace PostgreSQLDocumentManager.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(CreateUserResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize]
         public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -70,8 +80,11 @@ namespace PostgreSQLDocumentManager.Controllers
         [HttpPatch("{id}")]
         [ProducesResponseType(typeof(UserResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 404)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(int id, UpdateUserRequest updateUserRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -91,8 +104,11 @@ namespace PostgreSQLDocumentManager.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 404)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
         {
             var success = await userService.DeleteUserAsync(id, cancellationToken);
