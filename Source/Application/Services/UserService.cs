@@ -26,13 +26,7 @@ namespace ApplicationCore.Services
 
         public async Task<bool> DeleteUserAsync(int id, CancellationToken cancellationToken = default)
         {
-            var affectedEntities = await userRepository.DeleteAsync(id, cancellationToken);
-            if (affectedEntities > 0)
-            {
-                return true;
-            }
-
-            return false;
+            return await userRepository.DeleteAsync(id, cancellationToken);            
         }
 
         public async Task<UserResponse?> GetUserAsync(int id, CancellationToken cancellationToken = default)
@@ -49,9 +43,9 @@ namespace ApplicationCore.Services
         public async Task<IEnumerable<UserResponse>> GetUsersAsync(CancellationToken cancellationToken = default)
         {
             var users = await userRepository.GetAllAsync(cancellationToken);
-            if (users.Any())
+            if (users != null && users.Any())
             {
-                return users.Where(item => item is not null).Select(user => new UserResponse(user!));
+                return users.Select(user => new UserResponse(user));
             }
             
             return new List<UserResponse>();
@@ -118,8 +112,11 @@ namespace ApplicationCore.Services
                     logger.LogInformation("User updated. User Id: {userId}, Username: {username}", updatedUser.Id, updatedUser.Username);
                     return new UserResponse(updatedUser);
                 }
-
-                return default;
+                else
+                {
+                    logger.LogInformation("Attempt to update non existing user. User Id: {userId}", userId);
+                    return default;
+                }               
             }
             catch (Exception ex)
             {                

@@ -1,6 +1,8 @@
-﻿namespace ApplicationCore.Dtos
+﻿using ApplicationCore.Dtos;
+
+namespace ApplicationCore.Interfaces.Dtos
 {
-    public record AuditableEntityDto<TKey> : BaseDto<TKey> where TKey : notnull
+    public record AuditableEntityDto<TKey> : BaseDto<TKey>, IAuditableEntityDto where TKey : notnull
     {
         public DateTime InsertedAt { get; set; }
         public string InsertedBy { get; set; } = default!;

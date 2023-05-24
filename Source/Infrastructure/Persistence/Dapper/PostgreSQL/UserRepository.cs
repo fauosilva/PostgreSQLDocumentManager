@@ -3,9 +3,11 @@ using ApplicationCore.Interfaces;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Persistence.Dapper.PostgreSQL
 {
+    [ExcludeFromCodeCoverage]
     public class UserRepository : AbstractRepository, IUserRepository
     {
         private const string ReturningFields = " RETURNING id, username, role, inserted_at, inserted_by, updated_at, updated_by";
@@ -42,12 +44,12 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
         /// <summary>
         /// Delete user into database.
-        /// Return 1 in case of existing record, return 0 in case of non-existing record.
+        /// Return true in case of existing record, return false in case of non-existing record.
         /// </summary>
         /// <param name="id">User id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public async Task<int> DeleteAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
@@ -57,7 +59,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
             var affectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(command), cancellationToken);
             logger.LogDebug("Number of records deleted {affectedRecords}", affectedRecords);
-            return affectedRecords;
+            return affectedRecords > 0;
         }
 
         /// <summary>
@@ -87,14 +89,14 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         /// <param name="id">User id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public async Task<IEnumerable<User?>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<User>?> GetAllAsync(CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "SELECT id, username, role, inserted_at, inserted_by, updated_at, updated_by FROM users";
             var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
 
-            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<User?>(command), cancellationToken);
+            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<User>(command), cancellationToken);
             logger.LogDebug("Returning {selectedRecord} users.", selectedRecords.Count());
             return selectedRecords;
         }

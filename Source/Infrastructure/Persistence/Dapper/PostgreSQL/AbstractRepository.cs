@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Infrastructure.Persistence.Dapper.PostgreSQL
 {
+    [ExcludeFromCodeCoverage]
     public abstract class AbstractRepository
     {
         private readonly ILogger<AbstractRepository> logger;
