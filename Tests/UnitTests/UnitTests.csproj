@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Source\PostgreSQLDocumentManager\PostgreSQLDocumentManager.csproj" />
+    <ProjectReference Include="..\..\Source\PostgreSQLDocumentManager\PostgreSQLDocumentManager.csproj" />
   </ItemGroup>
 
 </Project>

@@ -63,7 +63,7 @@ CREATE TABLE document_permissions (
 
 -- Seed Data
  
- INSERT INTO users(username, password, role, inserted_by) VALUES ('adminuser', 'AJub08dIVXIQOmdvnY7jJpoz74/a9gNPbYwAXq7K9TYrWbT8GcU2CBZ2hL6Qu/s4iA==', 'Admin', 'seed');
+ INSERT INTO users(username, password, role, inserted_by) VALUES ('adminuser', 'AQAAAAIAAYagAAAAEKuu/MXe/4Bk85Ckgbs5KUbdrb2sYPJ7UVvRjL1CZAHMO4v+bPlRbJY2zm3gCLsaNg==', 'Admin', 'seed');
  
  INSERT INTO groups(name, inserted_by) VALUES ('group1', 'seed');
  INSERT INTO groups(name, inserted_by) VALUES ('group2', 'seed');
