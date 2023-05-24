@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
 using ApplicationCore.Interfaces.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,8 @@ using System.Text;
 
 namespace PostgreSQLDocumentManager.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion(1.0)]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
