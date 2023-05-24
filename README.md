@@ -14,6 +14,7 @@
 	3. Business logic validations were implemented on the service layer.
 	4. Authorization logic was implemented on the controller layer.
 4. Controllers
+    1. Exceptions propagated to the controller layer are handled by the exception handler returning a slighly enhanced problem details object.
 5. Services
 	1. Single database operations using the repository layer are not using the transaction block, or unit of work pattern since PostgreSQL MVCC actually handle those statements into a implicit transaction.
 6. Repositories / Database

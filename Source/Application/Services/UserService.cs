@@ -46,7 +46,7 @@ namespace ApplicationCore.Services
             return default;
         }
 
-        public async Task<IEnumerable<UserResponse?>> GetUsersAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UserResponse>> GetUsersAsync(CancellationToken cancellationToken = default)
         {
             var users = await userRepository.GetAllAsync(cancellationToken);
             if (users.Any())
@@ -54,7 +54,7 @@ namespace ApplicationCore.Services
                 return users.Where(item => item is not null).Select(user => new UserResponse(user!));
             }
             
-            return new List<UserResponse?>();
+            return new List<UserResponse>();
         }
 
         public async Task<CreateUserResponse> CreateUserAsync(CreateUserRequest createUserRequest, CancellationToken cancellationToken = default)
