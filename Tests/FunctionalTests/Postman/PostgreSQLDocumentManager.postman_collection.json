@@ -10,7 +10,7 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "GetUsers",
+					"name": "Users",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -61,7 +61,7 @@
 					"response": []
 				},
 				{
-					"name": "GetUser/{id}",
+					"name": "Users/{id}",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -113,7 +113,7 @@
 					"response": []
 				},
 				{
-					"name": "GetUser/{id} Copy",
+					"name": "Users",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -173,7 +173,7 @@
 					"response": []
 				},
 				{
-					"name": "GetUser/{id} Copy",
+					"name": "Users/{id}",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -234,7 +234,7 @@
 					"response": []
 				},
 				{
-					"name": "GetUser/{id} Copy 2",
+					"name": "Users/{id}",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -295,6 +295,87 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Documents",
+			"item": [
+				{
+					"name": "Documents",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "sample",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "sampledescription",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "samplecategory",
+									"type": "text"
+								},
+								{
+									"key": "filename",
+									"type": "file",
+									"src": "/C:/Users/fauos/OneDrive/Imagens/800px-Brasão_da_UFBA.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/Documents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"Documents"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -303,7 +384,9 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"if(!pm.collectionVariables.get('bearerToken'))",
+					"var bearerToken = pm.collectionVariables.get('bearerToken')",
+					"",
+					"if(!bearerToken)",
 					"{",
 					"    console.log(\"Generating a new jwt token\");",
 					"    var baseUrl = pm.collectionVariables.get(\"baseUrl\");",
