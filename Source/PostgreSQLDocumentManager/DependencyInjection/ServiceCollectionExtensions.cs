@@ -3,6 +3,7 @@ using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Services;
 using Infrastructure.Password;
 using Infrastructure.Persistence.Dapper.PostgreSQL;
+using Infrastructure.Persistence.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -27,14 +28,15 @@ namespace PostgreSQLDocumentManager.DependencyInjection
 
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration config)
         {
-            var connectionString = config.GetConnectionString("DocumentManager");
-
+            var connectionString = config.GetConnectionString("DocumentManager");            
             var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             var npgSqlDataSource = npgsqlDataSourceBuilder.Build();
-
             services.AddSingleton<DbDataSource>(npgSqlDataSource);
 
 
+            services.Configure<AWSConfiguration>(config.GetSection("Aws"));
+
+            services.AddScoped<IFileService, FileService>();
             services.AddScoped<IPasswordVerificationService, PasswordVerificationService>();
             services.AddScoped<IHashPasswordService, HashPasswordService>();
         }

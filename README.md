@@ -54,8 +54,7 @@
 ## Improvements
 
 - Logs
-    - [ ] Improve log scopes
-	- [ ] Propagate log scopes from the controllers
+    - [ ] Implement log scopes to enrich the logged information
 - API Design
 	- [ ] Return list of entities using pagination.
 - Security
