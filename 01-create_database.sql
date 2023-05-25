@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS document_permissions;
-DROP TABLE IF EXISTS document;
+DROP TABLE IF EXISTS documents;
 DROP TABLE IF EXISTS user_groups;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS users;

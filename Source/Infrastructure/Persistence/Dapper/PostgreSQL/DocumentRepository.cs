@@ -34,7 +34,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "INSERT INTO document(name, description, category, keyname, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Inserted_by)" + ReturningFields;
+            string sql = "INSERT INTO documents(name, description, category, keyname, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Inserted_by)" + ReturningFields;
             var parameters = new { name, description, category, keyname, inserted_by = "Sample" };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 

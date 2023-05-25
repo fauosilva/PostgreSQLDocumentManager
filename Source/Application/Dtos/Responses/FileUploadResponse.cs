@@ -9,6 +9,7 @@ namespace ApplicationCore.Dtos.Responses
         {
             Id = document.Id;
             Name = document.Name;
+            KeyName = document.Name;
             Category = document.Category;
             Description = document.Description;
             InsertedAt = document.Inserted_At;
@@ -16,6 +17,7 @@ namespace ApplicationCore.Dtos.Responses
         }
 
         public string Name { get; set; }
+        public string KeyName { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
     }
