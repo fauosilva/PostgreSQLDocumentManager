@@ -1,7 +1,11 @@
-﻿namespace ApplicationCore.Interfaces.Services
+﻿using ApplicationCore.Dtos.Requests;
+using ApplicationCore.Dtos.Responses;
+using ApplicationCore.Entities;
+
+namespace ApplicationCore.Interfaces.Services
 {
     public interface IFileService
     {
-        Task<bool> UploadFileAsync(string storageName, string filePath, string? keyName = null);
+        Task<FileUploadResponse> UploadFileAsync(Stream fileStream, FileUploadRequest fileUploadRequest, CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Interfaces;
+using ApplicationCore.Interfaces.Repositories;
 using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Services;
 using Infrastructure.Password;
@@ -17,6 +18,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
     {
         public static void AddServices(this IServiceCollection serviceCollection)
         {
+            serviceCollection.AddScoped<IFileService, FileService>();
             serviceCollection.AddScoped<IUserService, UserService>();
             serviceCollection.AddScoped<ILoginService, LoginService>();
         }
@@ -24,6 +26,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
         public static void AddRepositories(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IUserRepository, UserRepository>();
+            serviceCollection.AddScoped<IDocumentRepository, DocumentRepository>();
         }
 
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration config)
@@ -33,10 +36,9 @@ namespace PostgreSQLDocumentManager.DependencyInjection
             var npgSqlDataSource = npgsqlDataSourceBuilder.Build();
             services.AddSingleton<DbDataSource>(npgSqlDataSource);
 
-
             services.Configure<AWSConfiguration>(config.GetSection("Aws"));
-
-            services.AddScoped<IFileService, FileService>();
+            
+            services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IPasswordVerificationService, PasswordVerificationService>();
             services.AddScoped<IHashPasswordService, HashPasswordService>();
         }

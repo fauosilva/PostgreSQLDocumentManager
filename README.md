@@ -54,8 +54,10 @@
 ## Improvements
 
 - Logs
-    - [ ] Implement log scopes to enrich the logged information
+    - [ ] Implement log scopes to enrich the logged information.
 - API Design
 	- [ ] Return list of entities using pagination.
 - Security
     - [ ] Rate limit on login requests based on origin.
+- File Upload
+	- [ ] Filter file extensions and other file upload validations.

@@ -35,11 +35,12 @@ CREATE TABLE user_groups (
 	UNIQUE (user_id, group_id)
 );
 
-CREATE TABLE document (
+CREATE TABLE documents (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     category TEXT NOT NULL,
+    keyname TEXT NOT NULL,
     inserted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     inserted_by TEXT NOT NULL,
     updated_at TIMESTAMPTZ NULL,
@@ -49,7 +50,7 @@ CREATE TABLE document (
 
 CREATE TABLE document_permissions (
     id SERIAL PRIMARY KEY,
-    document_id INT REFERENCES Document(Id) NOT NULL,
+    document_id INT REFERENCES documents(Id) NOT NULL,
     user_id INT REFERENCES Users(Id) NULL,
     group_id INT REFERENCES Groups(Id) NULL,
 	inserted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

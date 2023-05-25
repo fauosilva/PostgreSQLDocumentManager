@@ -1,6 +1,6 @@
 ﻿namespace ApplicationCore.Dtos.Responses
 {
-    public class LoginResponse
+    public record LoginResponse
     {
         public LoginResponse(string jwtToken)
         {
