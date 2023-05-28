@@ -1,16 +1,12 @@
-﻿namespace ApplicationCore.Dtos.Requests
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ApplicationCore.Dtos.Requests
 {
-    //Todo: Improve validation to use proper validation model
-    public class FileUploadRequest
+    public class FileUploadRequest : IValidatableObject
     {
         public string? Name { get; private set; }
         public string? Description { get; private set; }
         public string? Category { get; private set; }
-
-        public bool IsValid()
-        {
-            return !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Description) && !string.IsNullOrEmpty(Category);
-        }
 
         public void AddMetadata(string key, string value)
         {
@@ -33,6 +29,24 @@
         public string GetKeyName()
         {
             return DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + Name;
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrEmpty(Name))
+            {
+                yield return new ValidationResult("File name must be provided.", new string[] { nameof(Name) });
+            }
+
+            if (string.IsNullOrEmpty(Description))
+            {
+                yield return new ValidationResult("File description must be provided.", new string[] { nameof(Description) });
+            }
+
+            if (string.IsNullOrEmpty(Category))
+            {
+                yield return new ValidationResult("File category must be provided.", new string[] { nameof(Category) });
+            }
         }
     }
 }

@@ -1,26 +1,29 @@
 using ApplicationCore.Exceptions;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 using PostgreSQLDocumentManager.DependencyInjection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+//Route Options
 builder.Services.Configure<RouteOptions>(options =>
 {
     options.LowercaseUrls = true;
     options.LowercaseQueryStrings = true;
 });
 
+//Json Serialization
 builder.Services.AddControllers().AddJsonOptions(x =>
 {
     x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+//Api versioning
 builder.Services.AddApiVersioning(options =>
 {
     options.ReportApiVersions = true;
@@ -32,6 +35,7 @@ builder.Services.AddApiVersioning(options =>
     setup.SubstituteApiVersionInUrl = true;
 });
 
+//Api Return
 builder.Services.AddProblemDetails(setup =>
 {
     setup.CustomizeProblemDetails = ctx =>
@@ -43,6 +47,17 @@ builder.Services.AddProblemDetails(setup =>
             ctx.ProblemDetails.Detail = exceptionHandler.Error.Message;
         }
     };
+});
+
+//File upload max limit
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 128 * 1024 * 1024; // if don't set default value is: 30 MB
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{    
+    options.MultipartBodyLengthLimit = 128 * 1024 * 1024; // if don't set default value is: 128 MB
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -90,14 +105,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
     options =>
     {
-        foreach (var description in app.DescribeApiVersions())
+        foreach (var groupName in app.DescribeApiVersions().Select(description => description.GroupName))
         {
             options.SwaggerEndpoint(
-                $"/swagger/{description.GroupName}/swagger.json",
-                description.GroupName);
+                $"/swagger/{groupName}/swagger.json",
+               groupName);
         }
     });
 }
+
 
 app.UseHttpsRedirection();
 

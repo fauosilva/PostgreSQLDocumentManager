@@ -1,5 +1,4 @@
 ﻿using ApplicationCore.Entities;
-using ApplicationCore.Interfaces.Dtos;
 
 namespace ApplicationCore.Dtos.Responses
 {

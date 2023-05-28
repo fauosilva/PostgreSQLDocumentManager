@@ -1,6 +1,6 @@
-﻿using ApplicationCore.Dtos;
+﻿using ApplicationCore.Interfaces.Dtos;
 
-namespace ApplicationCore.Interfaces.Dtos
+namespace ApplicationCore.Dtos
 {
     public record AuditableEntityDto<TKey> : BaseDto<TKey>, IAuditableEntityDto where TKey : notnull
     {

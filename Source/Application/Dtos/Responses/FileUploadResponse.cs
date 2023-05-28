@@ -1,5 +1,4 @@
 ﻿using ApplicationCore.Entities;
-using ApplicationCore.Interfaces.Dtos;
 
 namespace ApplicationCore.Dtos.Responses
 {
@@ -9,7 +8,7 @@ namespace ApplicationCore.Dtos.Responses
         {
             Id = document.Id;
             Name = document.Name;
-            KeyName = document.Name;
+            KeyName = document.KeyName;
             Category = document.Category;
             Description = document.Description;
             InsertedAt = document.Inserted_At;

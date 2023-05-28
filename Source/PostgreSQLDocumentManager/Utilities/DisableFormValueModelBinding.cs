@@ -16,6 +16,7 @@ namespace PostgreSQLDocumentManager.Utilities
 
         public void OnResourceExecuted(ResourceExecutedContext context)
         {
+            //DO nothing after resource filter execution
         }
     }
 }

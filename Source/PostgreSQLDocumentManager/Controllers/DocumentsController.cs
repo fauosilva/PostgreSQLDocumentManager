@@ -1,5 +1,4 @@
-﻿using Amazon.S3;
-using ApplicationCore.Dtos.Requests;
+﻿using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
 using ApplicationCore.Interfaces.Services;
 using Asp.Versioning;
@@ -61,39 +60,48 @@ namespace PostgreSQLDocumentManager.Controllers
                     var formDataSection = section.AsFormDataSection();
                     if (formDataSection != null)
                     {
-                        string sectionName = formDataSection.Name;
-                        string value = await formDataSection.Section.ReadAsStringAsync(cancellationToken);
-                        logger.LogDebug("File metadata received {sectionName}, {value}.", sectionName, value);
-
-                        fileUploadRequest.AddMetadata(sectionName, value);
+                        await HandleFormData(fileUploadRequest, formDataSection, cancellationToken);
                     }
                     else
                     {
-                        var fileStream = section.AsFileSection()?.FileStream;
-                        if (fileStream != null)
-                        {
-                            logger.LogDebug("Starting file upload service");
-                            fileUploadResponse = await fileService.UploadFileAsync(fileStream, fileUploadRequest, cancellationToken);
-                        }
+                        fileUploadResponse = await HandleFileUpload(fileUploadRequest, section, cancellationToken);
                     }
                     section = await multipartReader.ReadNextSectionAsync(cancellationToken);
                 }
 
-                if(fileUploadResponse != null)
+                if (fileUploadResponse != null)
                     return Ok(fileUploadResponse);
 
                 return Problem("Unable to upload file and return file information");
-            }
-            catch (AmazonS3Exception exception)
-            {
-                logger.LogError(exception, "An AmazonS3Exception was thrown: {message}", exception.Message);
-                return Problem("Unable to upload file.");
             }
             catch (Exception exception)
             {
                 logger.LogError(exception, "An exception was thrown: {message}", exception.Message);
                 return Problem("Unable to upload file.");
             }
+        }
+
+        private async Task<FileUploadResponse?> HandleFileUpload(FileUploadRequest fileUploadRequest, MultipartSection section, CancellationToken cancellationToken)
+        {
+            var fileStream = section.AsFileSection()?.FileStream;
+            var contentType = section.Headers?.GetValueOrDefault(HeaderNames.ContentType);
+
+            if (fileStream != null)
+            {
+                logger.LogDebug("Starting file upload service");
+                return await fileService.UploadFileAsync(fileStream, contentType, fileUploadRequest, cancellationToken);
+            }
+
+            return null;
+        }
+
+        private async Task HandleFormData(FileUploadRequest fileUploadRequest, FormMultipartSection formDataSection, CancellationToken cancellationToken)
+        {
+            string sectionName = formDataSection.Name;
+            string value = await formDataSection.Section.ReadAsStringAsync(cancellationToken);
+            logger.LogDebug("File metadata received {sectionName}, {value}.", sectionName, value);
+
+            fileUploadRequest.AddMetadata(sectionName, value);
         }
     }
 }

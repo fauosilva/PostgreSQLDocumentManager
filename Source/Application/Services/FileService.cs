@@ -3,6 +3,7 @@ using ApplicationCore.Dtos.Responses;
 using ApplicationCore.Exceptions;
 using ApplicationCore.Interfaces.Repositories;
 using ApplicationCore.Interfaces.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationCore.Services
 {
@@ -17,22 +18,33 @@ namespace ApplicationCore.Services
             this.documentRepository = documentRepository;
         }
 
-        public async Task<FileUploadResponse> UploadFileAsync(Stream fileStream, FileUploadRequest fileUploadRequest, CancellationToken cancellationToken = default)
+        public async Task<FileUploadResponse> UploadFileAsync(Stream fileStream, string? contentType, FileUploadRequest fileUploadRequest, CancellationToken cancellationToken = default)
         {
-            if (!fileUploadRequest.IsValid())
+            var uploadRequestValidation = fileUploadRequest.Validate(new ValidationContext(fileUploadRequest));
+            if (uploadRequestValidation.Any())
             {
-                throw new ServiceException("Unable to upload file to storage. Invalid metadata");
+                throw new ServiceException($"Unable to upload file to storage. Invalid metadata. {string.Join(',', uploadRequestValidation)}");
             }
 
-            var uploadSuccess = await fileRepository.UploadFileAsync(fileStream, fileUploadRequest, cancellationToken);
-            if (!uploadSuccess)
+            try
             {
-                throw new ServiceException("Unable to upload file to storage.");
+                var createdDocument = await documentRepository.AddAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, fileUploadRequest.GetKeyName(), cancellationToken);
+
+                var uploadSuccess = await fileRepository.UploadLargeFileAsync(fileStream, contentType, fileUploadRequest.GetKeyName(),
+                    fileUploadRequest.Name!, fileUploadRequest.Category!, fileUploadRequest.Description!, cancellationToken);
+
+                if (!uploadSuccess)
+                {
+                    throw new ServiceException("Unable to upload file to storage.");
+                }
+
+                return new FileUploadResponse(createdDocument);
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException($"Unexpected issue while attempting upload file. Message: {ex.Message}", ex);
             }
 
-            var createdDocument = await documentRepository.AddAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, fileUploadRequest.GetKeyName(), cancellationToken);
-
-            return new FileUploadResponse(createdDocument);
         }
     }
 }
