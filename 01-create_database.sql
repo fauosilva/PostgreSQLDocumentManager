@@ -37,10 +37,11 @@ CREATE TABLE user_groups (
 
 CREATE TABLE documents (
     id SERIAL PRIMARY KEY,
+    keyname TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     category TEXT NOT NULL,
-    keyname TEXT NOT NULL,
+    uploaded bit NOT NULL,
     inserted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     inserted_by TEXT NOT NULL,
     updated_at TIMESTAMPTZ NULL,

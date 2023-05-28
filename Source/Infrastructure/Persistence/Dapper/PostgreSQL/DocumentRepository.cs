@@ -10,7 +10,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
     [ExcludeFromCodeCoverage]
     public class DocumentRepository : AbstractRepository, IDocumentRepository
     {
-        private const string ReturningFields = " RETURNING id, name, description, category, keyname, inserted_at, inserted_by, updated_at, updated_by";
+        private const string ReturningFields = " RETURNING id, name, description, category, keyname, uploaded, inserted_at, inserted_by, updated_at, updated_by";
 
         private readonly ILogger<UserRepository> logger;
         private readonly DbDataSource dbDataSource;
@@ -20,6 +20,20 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             this.logger = logger;
             this.dbDataSource = dbDataSource;
         }
+        
+        ///// <returns>Document data stored on the database or null in case of non-existing docment</returns>
+        //public async Task<Document> GetDocumentByNameDescriptionAndCategoryAsync(string name, string description, string category, string keyname, CancellationToken cancellationToken = default)
+        //{
+        //    await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
+
+        //    string sql = "INSERT INTO documents(name, description, category, keyname, uploaded, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Uploaded, @Inserted_by)" + ReturningFields;
+        //    var parameters = new { name, description, category, keyname, inserted_by = "Sample" };
+        //    var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+
+        //    var createdRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstAsync<Document>(command), cancellationToken);
+        //    return createdRecord;
+        //}
+
 
         /// <summary>
         /// Inserts document into database.
@@ -29,13 +43,13 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         /// <param name="password">Hashed user password</param>
         /// <param name="role">User Role</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns></returns>
-        public async Task<Document> AddAsync(string name, string description, string category, string keyname, CancellationToken cancellationToken = default)
+        /// <returns>Document data stored on the database.</returns>
+        public async Task<Document> AddAsync(string name, string description, string category, string keyname, bool uploaded = false, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "INSERT INTO documents(name, description, category, keyname, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Inserted_by)" + ReturningFields;
-            var parameters = new { name, description, category, keyname, inserted_by = "Sample" };
+            string sql = "INSERT INTO documents(name, description, category, keyname, uploaded, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Uploaded, @Inserted_by)" + ReturningFields;
+            var parameters = new { name, description, category, keyname, uploaded, inserted_by = "Sample" };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var createdRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstAsync<Document>(command), cancellationToken);

@@ -1,7 +1,6 @@
 ﻿using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using ApplicationCore.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,71 +19,9 @@ namespace Infrastructure.Persistence.Files
             _AWSConfiguration = AWSConfiguration.Value;
         }
 
-        public async Task<bool> UploadFileAsync(Stream fileStream, string? contentType, string key, string name, string category, string description, CancellationToken cancellationToken = default)
-        {
-            RegionEndpoint? regionEndpoint = GetRegionEndpoint();
-            try
-            {
-                if (fileStream != null)
-                {
-                    using var memoryStream = new MemoryStream();
-                    await fileStream.CopyToAsync(memoryStream, cancellationToken);
-
-                    var fileTransferUtilityRequest = new TransferUtilityUploadRequest
-                    {
-                        BucketName = _AWSConfiguration.S3.BucketName,
-                        InputStream = memoryStream,
-                        StorageClass = S3StorageClass.StandardInfrequentAccess,
-                        Key = key
-                    };
-
-                    if (!string.IsNullOrEmpty(contentType))
-                    {
-                        fileTransferUtilityRequest.ContentType = contentType;
-                    }
-                    fileTransferUtilityRequest.Metadata.Add(nameof(name), name);
-                    fileTransferUtilityRequest.Metadata.Add(nameof(category), category);
-                    fileTransferUtilityRequest.Metadata.Add(nameof(description), description);
-
-                    var s3Client = new AmazonS3Client(_AWSConfiguration.S3.AccessKeyId, _AWSConfiguration.S3.AccessKeySecret, regionEndpoint);
-                    var fileTransferUtility = new TransferUtility(s3Client);
-
-                    await fileTransferUtility.UploadAsync(fileStream, _AWSConfiguration.S3.BucketName, key, cancellationToken);
-                    return true;
-                }
-
-                return false;
-            }
-            catch (AmazonS3Exception exception)
-            {
-                logger.LogError(exception, "An AmazonS3Exception was thrown: {message}", exception.Message);
-                return false;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "An exception was thrown: {message}", exception.Message);
-                return false;
-            }
-        }
-
-        private RegionEndpoint GetRegionEndpoint()
-        {
-            RegionEndpoint? regionEndpoint;
-            try
-            {
-                regionEndpoint = RegionEndpoint.GetBySystemName(_AWSConfiguration.S3.Region);
-            }
-            catch (Exception ex)
-            {
-                logger.LogCritical(ex, "Unable to recover Region Endpoint based on the configuration. Region: {Region}", _AWSConfiguration.S3.Region);
-                throw;
-            }
-
-            return regionEndpoint;
-        }
-
         /// <summary>
-        /// Upload for files larger than 5MB (5242880 bits) and unknown max size.
+        /// Upload for files with unknown size. 
+        /// Files larger than 5MB (5242880 bits) will be split into parts to be uploaded.
         /// </summary>
         /// <param name="fileStream">Filestream that contains the file content</param>
         /// <param name="contentType">File content type</param>
@@ -94,7 +31,7 @@ namespace Infrastructure.Persistence.Files
         /// <param name="description">File descrpition</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public async Task<bool> UploadLargeFileAsync(Stream fileStream, string? contentType, string key, string name, string category, string description, CancellationToken cancellationToken = default)
+        public async Task<bool> UploadUnkownFileSizeFromStream(Stream fileStream, string? contentType, string key, string name, string category, string description, CancellationToken cancellationToken = default)
         {
             RegionEndpoint? regionEndpoint = GetRegionEndpoint();
             List<UploadPartResponse> uploadResponses = new();
@@ -121,22 +58,26 @@ namespace Infrastructure.Persistence.Files
 
             try
             {
-                logger.LogInformation("Upload large file using parts");
-
                 int partNumber = 1;
                 int partSize = 5242880; // 5 MB
+                int bufferLength = 4096; //4kb
 
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(81920);
+                logger.LogDebug("Upload file using parts with partsize {partSize}", partSize);
+                
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferLength);
                 using var memoryStream = new MemoryStream();
                 try
                 {
                     int bytesRead;
                     while ((bytesRead = await fileStream.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false)) != 0)
-                    {
+                    {                        
                         await memoryStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
                         if (memoryStream.Length >= partSize)
                         {
+                            logger.LogInformation("File {key} split into parts to upload. PartNumber: {partNumber}", key, partNumber);
                             await UploadPartAsync(key, uploadResponses, s3Client, initResponse, partNumber, memoryStream, false, cancellationToken);
+                            
+                            //Reusing the same memory stream to accumulate upload parts.
                             memoryStream.SetLength(0);
                             partNumber++;
                         }
@@ -182,11 +123,24 @@ namespace Infrastructure.Persistence.Files
             }
         }
 
+        private RegionEndpoint GetRegionEndpoint()
+        {
+            try
+            {
+                return RegionEndpoint.GetBySystemName(_AWSConfiguration.S3.Region);
+            }
+            catch (Exception ex)
+            {
+                logger.LogCritical(ex, "Unable to recover Region Endpoint based on the configuration. Region: {Region}", _AWSConfiguration.S3.Region);
+                throw;
+            }
+        }
+
         private async Task UploadPartAsync(string key, List<UploadPartResponse> uploadResponses, AmazonS3Client s3Client, InitiateMultipartUploadResponse initResponse, int partNumber, MemoryStream memoryStream, bool isLastPart, CancellationToken cancellationToken)
         {
             using var completeStream = new MemoryStream(memoryStream.ToArray());
 
-            logger.LogWarning("UploadPartRequest for partNumber {partNumber} is going to be created with {memoryStream.Length} Kb", partNumber, completeStream.Length / 1024);
+            logger.LogInformation("UploadPartRequest for partNumber {partNumber} is going to be created with {memoryStream.Length} Kb", partNumber, completeStream.Length / 1024);
             UploadPartRequest uploadRequest = new()
             {
                 BucketName = _AWSConfiguration.S3.BucketName,

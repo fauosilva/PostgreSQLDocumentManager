@@ -28,9 +28,9 @@ namespace ApplicationCore.Services
 
             try
             {
-                var createdDocument = await documentRepository.AddAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, fileUploadRequest.GetKeyName(), cancellationToken);
+                var createdDocument = await documentRepository.AddAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, fileUploadRequest.GetKeyName(), cancellationToken: cancellationToken);
 
-                var uploadSuccess = await fileRepository.UploadLargeFileAsync(fileStream, contentType, fileUploadRequest.GetKeyName(),
+                var uploadSuccess = await fileRepository.UploadUnkownFileSizeFromStream(fileStream, contentType, fileUploadRequest.GetKeyName(),
                     fileUploadRequest.Name!, fileUploadRequest.Category!, fileUploadRequest.Description!, cancellationToken);
 
                 if (!uploadSuccess)

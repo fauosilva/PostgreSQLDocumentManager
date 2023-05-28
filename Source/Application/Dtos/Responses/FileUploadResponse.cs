@@ -11,6 +11,7 @@ namespace ApplicationCore.Dtos.Responses
             KeyName = document.KeyName;
             Category = document.Category;
             Description = document.Description;
+            Uploaded = document.Uploaded;
             InsertedAt = document.Inserted_At;
             InsertedBy = document.Inserted_By;
         }
@@ -19,5 +20,6 @@ namespace ApplicationCore.Dtos.Responses
         public string KeyName { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
+        public bool Uploaded { get; set; }
     }
 }
