@@ -2,9 +2,9 @@
 
 namespace ApplicationCore.Dtos.Responses
 {
-    public record FileUploadResponse : AuditableEntityDto<int>
+    public record DocumentResponse : AuditableEntityDto<int>
     {
-        public FileUploadResponse(Document document)
+        public DocumentResponse(Document document)
         {
             Id = document.Id;
             Name = document.Name;
@@ -14,6 +14,8 @@ namespace ApplicationCore.Dtos.Responses
             Uploaded = document.Uploaded;
             InsertedAt = document.Inserted_At;
             InsertedBy = document.Inserted_By;
+            UpdatedAt = document.Updated_At;
+            UpdatedBy = document.Updated_By;
         }
 
         public string Name { get; set; }

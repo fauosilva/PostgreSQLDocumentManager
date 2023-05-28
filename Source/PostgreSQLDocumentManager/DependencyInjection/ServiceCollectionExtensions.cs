@@ -18,7 +18,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
     {
         public static void AddServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IFileService, FileService>();
+            serviceCollection.AddScoped<IDocumentService, DocumentService>();
             serviceCollection.AddScoped<IUserService, UserService>();
             serviceCollection.AddScoped<ILoginService, LoginService>();
         }
@@ -36,7 +36,8 @@ namespace PostgreSQLDocumentManager.DependencyInjection
             var npgSqlDataSource = npgsqlDataSourceBuilder.Build();
             services.AddSingleton<DbDataSource>(npgSqlDataSource);
 
-            services.Configure<AWSConfiguration>(config.GetSection("Aws"));
+            services.Configure<FileUploadConfiguration>(config.GetSection(FileUploadConfiguration.ConfigSection));
+            services.Configure<AWSConfiguration>(config.GetSection(AWSConfiguration.ConfigSection));
             
             services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IPasswordVerificationService, PasswordVerificationService>();
@@ -45,7 +46,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
 
         public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
         {
-            var section = config.GetSection("Jwt");
+            var section = config.GetSection(JwtConfiguration.ConfigSection);
             services.Configure<JwtConfiguration>(section);
 
             var jwtConfiguration = section.Get<JwtConfiguration>();

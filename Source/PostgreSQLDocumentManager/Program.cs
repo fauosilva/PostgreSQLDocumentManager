@@ -35,7 +35,7 @@ builder.Services.AddApiVersioning(options =>
     setup.SubstituteApiVersionInUrl = true;
 });
 
-//Api Return
+//Api Error return details
 builder.Services.AddProblemDetails(setup =>
 {
     setup.CustomizeProblemDetails = ctx =>
@@ -54,7 +54,6 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 128 * 1024 * 1024; // if don't set default value is: 30 MB
 });
-
 builder.Services.Configure<FormOptions>(options =>
 {    
     options.MultipartBodyLengthLimit = 128 * 1024 * 1024; // if don't set default value is: 128 MB

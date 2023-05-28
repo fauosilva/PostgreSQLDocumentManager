@@ -11,12 +11,45 @@ namespace Infrastructure.Persistence.Files
     public class FileRepository : IFileRepository
     {
         private readonly ILogger<FileRepository> logger;
-        private readonly AWSConfiguration _AWSConfiguration;
+        private readonly AmazonS3Client s3Client;
+        private readonly string bucketName;
 
         public FileRepository(ILogger<FileRepository> logger, IOptions<AWSConfiguration> AWSConfiguration)
         {
-            this.logger = logger;
-            _AWSConfiguration = AWSConfiguration.Value;
+            this.logger = logger;            
+            bucketName = AWSConfiguration.Value.S3.BucketName;
+            s3Client = new AmazonS3Client(AWSConfiguration.Value.S3.AccessKeyId, AWSConfiguration.Value.S3.AccessKeySecret,
+                GetRegionEndpoint(AWSConfiguration.Value.S3.Region));
+        }
+
+        public async Task<Stream> DownloadFileAsync(string key, CancellationToken cancellationToken = default)
+        {
+            GetObjectRequest request = new()
+            {
+                BucketName = bucketName,
+                Key = key
+            };
+
+            GetObjectResponse? response = null;
+            try
+            {
+                //Not disposing object since they will be used on the service response
+                response = await s3Client.GetObjectAsync(request, cancellationToken);
+                return response.ResponseStream;
+            }
+            catch (AmazonS3Exception e)
+            {
+                response?.Dispose();
+                // If bucket or object does not exist
+                logger.LogError("Error encountered. Message:'{message}' when reading object", e.Message);
+                throw;
+            }
+            catch (Exception e)
+            {
+                response?.Dispose();
+                logger.LogError("Unknown encountered on server. Message:'{message}' when reading object", e.Message);
+                throw;
+            }
         }
 
         /// <summary>
@@ -30,18 +63,15 @@ namespace Infrastructure.Persistence.Files
         /// <param name="category">File category</param>
         /// <param name="description">File descrpition</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns></returns>
-        public async Task<bool> UploadUnkownFileSizeFromStream(Stream fileStream, string? contentType, string key, string name, string category, string description, CancellationToken cancellationToken = default)
+        /// <returns>True in case of successfull upload, otherwise false.</returns>
+        public async Task<bool> UploadFromStreamAsync(Stream fileStream, string? contentType, string key, string name, string category, string description, CancellationToken cancellationToken = default)
         {
-            RegionEndpoint? regionEndpoint = GetRegionEndpoint();
             List<UploadPartResponse> uploadResponses = new();
-
-            var s3Client = new AmazonS3Client(_AWSConfiguration.S3.AccessKeyId, _AWSConfiguration.S3.AccessKeySecret, regionEndpoint);
 
             // Setup information required to initiate the multipart upload.
             InitiateMultipartUploadRequest initiateRequest = new()
             {
-                BucketName = _AWSConfiguration.S3.BucketName,
+                BucketName = bucketName,
                 Key = key
             };
 
@@ -92,7 +122,7 @@ namespace Infrastructure.Persistence.Files
                 // Setup to complete the upload.
                 CompleteMultipartUploadRequest completeRequest = new()
                 {
-                    BucketName = _AWSConfiguration.S3.BucketName,
+                    BucketName = bucketName,
                     Key = key,
                     UploadId = initResponse.UploadId,
                 };
@@ -110,7 +140,7 @@ namespace Infrastructure.Persistence.Files
                 // Abort the upload.
                 AbortMultipartUploadRequest abortMPURequest = new()
                 {
-                    BucketName = _AWSConfiguration.S3.BucketName,
+                    BucketName = bucketName,
                     Key = key,
                     UploadId = initResponse.UploadId
                 };
@@ -123,15 +153,15 @@ namespace Infrastructure.Persistence.Files
             }
         }
 
-        private RegionEndpoint GetRegionEndpoint()
+        private RegionEndpoint GetRegionEndpoint(string region)
         {
             try
             {
-                return RegionEndpoint.GetBySystemName(_AWSConfiguration.S3.Region);
+                return RegionEndpoint.GetBySystemName(region);
             }
             catch (Exception ex)
             {
-                logger.LogCritical(ex, "Unable to recover Region Endpoint based on the configuration. Region: {Region}", _AWSConfiguration.S3.Region);
+                logger.LogCritical(ex, "Unable to recover Region Endpoint based on the configuration. Region: {Region}", region);
                 throw;
             }
         }
@@ -143,7 +173,7 @@ namespace Infrastructure.Persistence.Files
             logger.LogInformation("UploadPartRequest for partNumber {partNumber} is going to be created with {memoryStream.Length} Kb", partNumber, completeStream.Length / 1024);
             UploadPartRequest uploadRequest = new()
             {
-                BucketName = _AWSConfiguration.S3.BucketName,
+                BucketName = bucketName,
                 Key = key,
                 UploadId = initResponse.UploadId,
                 PartNumber = partNumber,

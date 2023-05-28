@@ -41,7 +41,7 @@ namespace PostgreSQLDocumentManager.Controllers
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(UserResponse), 200)]
         [ProducesResponseType(typeof(void), 401)]
         [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]

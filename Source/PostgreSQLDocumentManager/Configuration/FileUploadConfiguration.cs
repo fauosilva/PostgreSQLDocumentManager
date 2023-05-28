@@ -1,9 +1,14 @@
-﻿namespace ApplicationCore.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PostgreSQLDocumentManager.Configuration
 {
-    public record BaseEntity<TKeyType> where TKeyType : notnull
+    public class FileUploadConfiguration
     {
+        public const string ConfigSection = "FileUpload";
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public TKeyType Id { get; set; }
+        [Required]
+        public HashSet<string> MimeTypes { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

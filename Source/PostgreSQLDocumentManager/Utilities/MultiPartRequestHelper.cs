@@ -30,22 +30,20 @@ namespace PostgreSQLDocumentManager.Utilities
                    && contentType.Contains("multipart/", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
-        {
-            // Content-Disposition: form-data; name="key";
-            return contentDisposition != null
-                && contentDisposition.DispositionType.Equals("form-data")
-                && string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value);
-        }
-
-        public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
+        public static string? GetFileContentDisposition(ContentDispositionHeaderValue? contentDisposition)
         {
             // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
-            return contentDisposition != null
-                && contentDisposition.DispositionType.Equals("form-data")
-                && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                    || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
+            if(contentDisposition != null
+                && contentDisposition.DispositionType.Equals("form-data"))
+            {
+                if(!string.IsNullOrEmpty(contentDisposition.FileName.Value))
+                    return contentDisposition.FileName.Value;
+                
+                if (!string.IsNullOrEmpty(contentDisposition.FileNameStar.Value))
+                    return contentDisposition.FileNameStar.Value;
+            }
+
+            return null;
         }
     }
 }

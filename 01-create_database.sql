@@ -41,7 +41,7 @@ CREATE TABLE documents (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     category TEXT NOT NULL,
-    uploaded bit NOT NULL,
+    uploaded boolean NOT NULL,
     inserted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     inserted_by TEXT NOT NULL,
     updated_at TIMESTAMPTZ NULL,
