@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using System.Collections;
-using System.Data;
 using UnitTests.Extensions.FluentAssertions;
 
 namespace UnitTests.ApplicationCore.Services
@@ -342,7 +341,7 @@ namespace UnitTests.ApplicationCore.Services
 
             //Assert
             returnedException.Should().BeNull();
-            result.Should().BeNull();            
+            result.Should().BeNull();
         }
 
         [Theory]
@@ -381,7 +380,7 @@ namespace UnitTests.ApplicationCore.Services
             UserResponse? result = null;
             try
             {
-               result = await userService.UpdateUserAsync(1, updateUserRequest, cancellationToken);
+                result = await userService.UpdateUserAsync(1, updateUserRequest, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -420,7 +419,7 @@ namespace UnitTests.ApplicationCore.Services
             returnedException.Should().BeOfType<ServiceException>();
         }
 
-        [Fact]        
+        [Fact]
         public async Task UpdateUserPasswordAsync_ShouldReturnUpdatedUser_WhenExistingUserIsUpdated()
         {
             //Arrange

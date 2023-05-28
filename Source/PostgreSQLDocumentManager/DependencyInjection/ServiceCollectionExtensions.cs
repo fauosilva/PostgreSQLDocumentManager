@@ -1,7 +1,9 @@
 ﻿using ApplicationCore.Interfaces;
+using ApplicationCore.Interfaces.Authentication;
 using ApplicationCore.Interfaces.Repositories;
 using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Services;
+using Infrastructure.Authentication;
 using Infrastructure.Password;
 using Infrastructure.Persistence.Dapper.PostgreSQL;
 using Infrastructure.Persistence.Files;
@@ -25,6 +27,7 @@ namespace PostgreSQLDocumentManager.DependencyInjection
 
         public static void AddRepositories(this IServiceCollection serviceCollection)
         {
+            serviceCollection.AddScoped<IFileRepository, FileRepository>();
             serviceCollection.AddScoped<IUserRepository, UserRepository>();
             serviceCollection.AddScoped<IDocumentRepository, DocumentRepository>();
         }
@@ -38,8 +41,8 @@ namespace PostgreSQLDocumentManager.DependencyInjection
 
             services.Configure<FileUploadConfiguration>(config.GetSection(FileUploadConfiguration.ConfigSection));
             services.Configure<AWSConfiguration>(config.GetSection(AWSConfiguration.ConfigSection));
-            
-            services.AddScoped<IFileRepository, FileRepository>();
+
+            services.AddScoped<IAuthenticatedUserContext, AuthenticatedUserContext>();            
             services.AddScoped<IPasswordVerificationService, PasswordVerificationService>();
             services.AddScoped<IHashPasswordService, HashPasswordService>();
         }

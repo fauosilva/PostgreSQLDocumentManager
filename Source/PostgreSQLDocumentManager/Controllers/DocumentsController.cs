@@ -48,30 +48,14 @@ namespace PostgreSQLDocumentManager.Controllers
         [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetDocument(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DownloadDocument(int id, CancellationToken cancellationToken)
         {
-            var document = await documentService.GetDocumentAsync(id, cancellationToken);
+            var document = await documentService.DownloadFileAsync(id, cancellationToken);
 
             if (document == null)
                 return NotFound();
 
-            return Ok(document);
-        }
-
-        [HttpGet("keyname/{keyName}")]
-        [ProducesResponseType(typeof(DocumentResponse), 200)]
-        [ProducesResponseType(typeof(void), 401)]
-        [ProducesResponseType(typeof(void), 403)]
-        [ProducesResponseType(typeof(ProblemDetails), 500)]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DownloadDocument(string keyName, CancellationToken cancellationToken)
-        {
-            var document = await documentService.DownloadFileAsync(keyName, cancellationToken);
-
-            if (document == null)
-                return NotFound();
-
-            return File(document, "image/png", "sample.png");
+            return File(document.Filestream, document.ContentType, document.Name);
         }
 
         [HttpPost]
@@ -158,7 +142,7 @@ namespace PostgreSQLDocumentManager.Controllers
                 }
                 else
                 {
-                    logger.LogWarning("Inconsitency validating file content type");
+                    logger.LogWarning("Inconsitency validating file content type.");
                     return Problem("Unable to validate content disposition header.");
                 }
             }

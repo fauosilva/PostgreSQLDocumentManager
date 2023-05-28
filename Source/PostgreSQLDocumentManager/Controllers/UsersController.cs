@@ -29,15 +29,8 @@ namespace PostgreSQLDocumentManager.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
         {
-
-            using (logger.BeginScope(new List<KeyValuePair<string, object>>
-            {
-                new KeyValuePair<string, object>("TransactionId", "sample"),
-            }))
-            {
-                var user = await userService.GetUsersAsync(cancellationToken);               
-                return Ok(user);
-            }
+            var user = await userService.GetUsersAsync(cancellationToken);
+            return Ok(user);
         }
 
         [HttpGet("{id}")]

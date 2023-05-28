@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence.Files
                 GetRegionEndpoint(AWSConfiguration.Value.S3.Region));
         }
 
-        public async Task<Stream> DownloadFileAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<(Stream, string)> DownloadFileAsync(string key, CancellationToken cancellationToken = default)
         {
             GetObjectRequest request = new()
             {
@@ -35,7 +35,7 @@ namespace Infrastructure.Persistence.Files
             {
                 //Not disposing object since they will be used on the service response
                 response = await s3Client.GetObjectAsync(request, cancellationToken);
-                return response.ResponseStream;
+                return (response.ResponseStream, response.Headers.ContentType);
             }
             catch (AmazonS3Exception e)
             {

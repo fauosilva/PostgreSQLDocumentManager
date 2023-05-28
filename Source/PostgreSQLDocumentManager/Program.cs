@@ -9,6 +9,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
+
 //Route Options
 builder.Services.Configure<RouteOptions>(options =>
 {
@@ -43,7 +45,7 @@ builder.Services.AddProblemDetails(setup =>
         ctx.ProblemDetails.Extensions.TryAdd("machineName", Environment.MachineName);
         var exceptionHandler = ctx.HttpContext.Features.Get<IExceptionHandlerPathFeature>();
         if (exceptionHandler != null && exceptionHandler.Error is ServiceException)
-        {
+        {            
             ctx.ProblemDetails.Detail = exceptionHandler.Error.Message;
         }
     };

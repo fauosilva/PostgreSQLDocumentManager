@@ -8,6 +8,8 @@ namespace ApplicationCore.Dtos.Requests
         public string? Description { get; private set; }
         public string? Category { get; private set; }
 
+        private string? keyName;
+        
         public void AddMetadata(string key, string value)
         {
             if (string.Equals(key, nameof(Name), StringComparison.InvariantCultureIgnoreCase))
@@ -28,7 +30,7 @@ namespace ApplicationCore.Dtos.Requests
 
         public string GetKeyName()
         {
-            return DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + Name;
+            return keyName ??= DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + Name;
         }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Interfaces.Authentication;
 using ApplicationCore.Interfaces.Repositories;
 using Dapper;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,13 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
         private readonly ILogger<DocumentRepository> logger;
         private readonly DbDataSource dbDataSource;
+        private readonly IAuthenticatedUserContext authenticatedUserContext;
 
-        public DocumentRepository(ILogger<DocumentRepository> logger, DbDataSource dbDataSource) : base(logger)
+        public DocumentRepository(ILogger<DocumentRepository> logger, DbDataSource dbDataSource, IAuthenticatedUserContext authenticatedUserContext ) : base(logger)
         {
             this.logger = logger;
             this.dbDataSource = dbDataSource;
+            this.authenticatedUserContext = authenticatedUserContext;
         }
 
         /// <summary>
@@ -37,7 +40,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "INSERT INTO documents(name, description, category, keyname, uploaded, inserted_by) VALUES(@Name, @Description, @Category, @Keyname, @Uploaded, @Inserted_by)" + ReturningFields;
-            var parameters = new { name, description, category, keyname, uploaded, inserted_by = "Sample" };
+            var parameters = new { name, description, category, keyname, uploaded, inserted_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var createdRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstAsync<Document>(command), cancellationToken);
@@ -66,25 +69,30 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         }
 
         /// <summary>
-        /// Returns document by keyname
-        /// Returns null in case of non-existing document
+        /// Update document uploaded status into database.
+        /// Returns null in case of non-existing document id.
+        /// Throws exceptions in case of database errors and constraint violations.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
-        /// <param name="category"></param>
-        /// <param name="cancellationToken">Cancelletion Token</param>
-        /// <returns>Document data stored on the database or null in case of non-existing document</returns>
-        public async Task<Document?> GetDocumentByKeyNameAsync(string keyName, CancellationToken cancellationToken = default)
+        /// <param name="id">Document id</param>
+        /// <param name="uploaded">Uploaded flag</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        public async Task<Document?> UpdateUploadedStatusAsync(int id, bool uploaded, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            //Todo: Add Index
-            string sql = "SELECT id, name, description, category, keyname, uploaded, inserted_at, inserted_by, updated_at, updated_by FROM documents WHERE keyname = @Keyname";
-            var parameters = new { keyName };
+            string sql = "UPDATE documents SET uploaded = @uploaded, updated_at = @updated_at, updated_by = @updated_by WHERE id = @id" + ReturningFields;
+            var parameters = new { id, uploaded, updated_at = DateTime.UtcNow, updated_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
-            var createdRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<Document?>(command), cancellationToken);
-            return createdRecord;
+            var updatedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<Document?>(command), cancellationToken);
+
+            if (updatedRecord != null)
+            {
+                logger.LogDebug("Updated document {id} uploaded status {uploaded}.", id, uploaded);
+            }
+
+            return updatedRecord;
         }
 
         /// <summary>
@@ -126,5 +134,4 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             return selectedRecords;
         }
     }
-
 }

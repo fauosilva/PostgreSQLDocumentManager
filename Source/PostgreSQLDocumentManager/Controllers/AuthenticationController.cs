@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Dtos.Requests;
+﻿using ApplicationCore.Constants;
+using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
 using ApplicationCore.Interfaces.Services;
 using Asp.Versioning;
@@ -40,8 +41,9 @@ namespace PostgreSQLDocumentManager.Controllers
             if (user != null)
             {
                 var claims = new List<Claim>() {
-                    new Claim("name", user.Username),
-                    new Claim("role", user.Role)
+                    new Claim(UserClaimsConstants.UserId, user.Id.ToString()),
+                    new Claim(UserClaimsConstants.UserName, user.Username),                    
+                    new Claim(UserClaimsConstants.Role, user.Role)
                 };
 
                 var issuer = options.Value.Issuer;

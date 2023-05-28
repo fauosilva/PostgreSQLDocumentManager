@@ -14,6 +14,8 @@ namespace ApplicationCore.Dtos.Responses
             Uploaded = document.Uploaded;
             InsertedAt = document.Inserted_At;
             InsertedBy = document.Inserted_By;
+            UpdatedAt = document.Updated_At;
+            UpdatedBy = document.Updated_By;
         }
 
         public string Name { get; set; }

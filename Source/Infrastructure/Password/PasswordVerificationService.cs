@@ -27,7 +27,9 @@ namespace Infrastructure.Password
                 case PasswordVerificationResult.SuccessRehashNeeded:
                     try
                     {
+                        logger.LogInformation("Password hash was verified with success, attempting to rehash.");
                         await userService.UpdatePasswordAsync(userId, providedPassword);
+                        logger.LogInformation("Password rehashed.");
                     }
                     catch (Exception ex)
                     {

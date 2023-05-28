@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Interfaces.Authentication;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
@@ -14,11 +15,13 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
         private readonly ILogger<UserRepository> logger;
         private readonly DbDataSource dbDataSource;
+        private readonly IAuthenticatedUserContext authenticatedUserContext;
 
-        public UserRepository(ILogger<UserRepository> logger, DbDataSource dbDataSource) : base(logger)
+        public UserRepository(ILogger<UserRepository> logger, DbDataSource dbDataSource, IAuthenticatedUserContext authenticatedUserContext) : base(logger)
         {
             this.logger = logger;
             this.dbDataSource = dbDataSource;
+            this.authenticatedUserContext = authenticatedUserContext;
         }
 
         /// <summary>
@@ -35,7 +38,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "INSERT INTO users(username, password, role, inserted_by) VALUES(@Username, @Password, @Role, @Inserted_by)" + ReturningFields;
-            var parameters = new { username, password, role, inserted_by = "Sample" };
+            var parameters = new { username, password, role, inserted_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var createdRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstAsync<User>(command), cancellationToken);
@@ -136,7 +139,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "UPDATE users SET password = @password, role = @role, updated_at = @updated_at, updated_by = @updated_by WHERE id = @id" + ReturningFields;
-            var parameters = new { id, password, role, updated_at = DateTime.UtcNow, updated_by = "Sample" };
+            var parameters = new { id, password, role, updated_at = DateTime.UtcNow, updated_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var updatedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<User?>(command), cancellationToken);
@@ -161,7 +164,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "UPDATE users SET password = @password, updated_at = @updated_at, updated_by = @updated_by WHERE id = @id" + ReturningFields;
-            var parameters = new { id, password, updated_at = DateTime.UtcNow, updated_by = "Sample" };
+            var parameters = new { id, password, updated_at = DateTime.UtcNow, updated_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var updatedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<User?>(command), cancellationToken);
@@ -188,7 +191,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
             string sql = "UPDATE users SET role = @role, updated_at = @updated_at, updated_by = @updated_by WHERE id = @id" + ReturningFields;
-            var parameters = new { id, role, updated_at = DateTime.UtcNow, updated_by = "Sample" };
+            var parameters = new { id, role, updated_at = DateTime.UtcNow, updated_by = authenticatedUserContext.GetUserName() };
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var updatedRecord = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryFirstOrDefaultAsync<User?>(command), cancellationToken);
