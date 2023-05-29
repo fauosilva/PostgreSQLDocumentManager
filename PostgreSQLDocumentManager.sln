@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Postman", "Postman", "{6850
 		Tests\FunctionalTests\Postman\PostgreSQLDocumentManager.postman_collection.json = Tests\FunctionalTests\Postman\PostgreSQLDocumentManager.postman_collection.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EndToEndTests", "EndToEndTests", "{EB0638D6-8512-4D12-9EC0-F01F377A0F1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,7 @@ Global
 		{32063A89-91A9-4374-AF69-1E87760E63F6} = {9CA917FB-7881-4765-9451-709B8BF8CD68}
 		{C81E27BE-DC4A-422C-8234-068C03B61B11} = {9CA917FB-7881-4765-9451-709B8BF8CD68}
 		{6850B21B-EA65-48FF-92F9-384AE33C1186} = {C81E27BE-DC4A-422C-8234-068C03B61B11}
+		{EB0638D6-8512-4D12-9EC0-F01F377A0F1D} = {9CA917FB-7881-4765-9451-709B8BF8CD68}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7966FF6E-AADD-4392-BA9D-4F868C82EEC8}

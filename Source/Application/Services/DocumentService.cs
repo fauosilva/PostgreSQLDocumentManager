@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
+using ApplicationCore.Entities;
 using ApplicationCore.Exceptions;
 using ApplicationCore.Interfaces.Repositories;
 using ApplicationCore.Interfaces.Services;
@@ -13,22 +14,20 @@ namespace ApplicationCore.Services
         private readonly ILogger<DocumentService> logger;
         private readonly IFileRepository fileRepository;
         private readonly IDocumentRepository documentRepository;
+        private readonly IDocumentPermissionRepository documentPermissionRepository;
 
-        public DocumentService(ILogger<DocumentService> logger, IFileRepository fileRepository, IDocumentRepository documentRepository)
+        public DocumentService(ILogger<DocumentService> logger, IFileRepository fileRepository, IDocumentRepository documentRepository,
+            IDocumentPermissionRepository documentPermissionRepository)
         {
             this.logger = logger;
             this.fileRepository = fileRepository;
             this.documentRepository = documentRepository;
+            this.documentPermissionRepository = documentPermissionRepository;
         }
 
         public async Task<DownloadDocumentResponse> DownloadFileAsync(int id, CancellationToken cancellationToken = default)
         {
-            var existingDocument = await documentRepository.GetAsync(id, cancellationToken);            
-            if (existingDocument == null || !existingDocument.Uploaded)
-            {
-                throw new ServiceException($"File was not found or not properly uploaded.");
-            }
-
+            Document existingDocument = await RetrieveExistingDocumentAsync(id, cancellationToken);
             var downloadResult = await fileRepository.DownloadFileAsync(existingDocument.KeyName, cancellationToken);
             return new DownloadDocumentResponse(downloadResult.Item1, existingDocument.Name, downloadResult.Item2);
         }
@@ -63,9 +62,9 @@ namespace ApplicationCore.Services
                 }
 
                 logger.LogInformation("Updating file uploaded information");
-                var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken) 
+                var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken)
                     ?? throw new ServiceException("File was created and uploaded, uploaded flag was not set.");
-                
+
                 return new CreateDocumentResponse(udpatedDocument);
             }
             catch (Exception ex)
@@ -84,6 +83,49 @@ namespace ApplicationCore.Services
             }
 
             return new List<DocumentResponse>();
+        }
+
+        public async Task<CreatePermissionResponse> CreateUserPermissionAsync(int id, int userId, CancellationToken cancellationToken = default)
+        {
+            var documentPermission = await InternalPermissionExecutorAsync(id, userId,
+                async (id, groupId) => await documentPermissionRepository.AddUserPermissionAsync(id, groupId, cancellationToken), cancellationToken);
+            return new CreatePermissionResponse(documentPermission);
+        }
+
+        public async Task<CreatePermissionResponse> CreateGroupPermissionAsync(int id, int groupId, CancellationToken cancellationToken = default)
+        {
+            var documentPermission = await InternalPermissionExecutorAsync(id, groupId,
+                async (id, groupId) => await documentPermissionRepository.AddGroupPermissionAsync(id, groupId, cancellationToken), cancellationToken);
+            return new CreatePermissionResponse(documentPermission);
+        }
+
+        public async Task<bool> DeleteUserPermissionAsync(int id, int userId, CancellationToken cancellationToken = default)
+        {
+            return await InternalPermissionExecutorAsync(id, userId,
+                async (id, userId) => await documentPermissionRepository.DeleteUserPermissionAsync(id, userId, cancellationToken), cancellationToken);
+        }
+
+        public async Task<bool> DeleteGroupPermissionAsync(int id, int groupId, CancellationToken cancellationToken = default)
+        {
+            return await InternalPermissionExecutorAsync(id, groupId,
+                 async (id, groupId) => await documentPermissionRepository.DeleteGroupPermissionAsync(id, groupId, cancellationToken), cancellationToken);
+        }
+
+        private async Task<T> InternalPermissionExecutorAsync<T>(int documentId, int relatedEntityId, Func<int, int, Task<T>> func, CancellationToken cancellationToken = default)
+        {
+            _ = await RetrieveExistingDocumentAsync(documentId, cancellationToken);
+            return await func(documentId, relatedEntityId);
+        }
+
+        private async Task<Document> RetrieveExistingDocumentAsync(int id, CancellationToken cancellationToken)
+        {
+            var existingDocument = await documentRepository.GetAsync(id, cancellationToken);
+            if (existingDocument == null || !existingDocument.Uploaded)
+            {
+                throw new ServiceException($"File was not found or not properly uploaded.");
+            }
+
+            return existingDocument;
         }
     }
 }

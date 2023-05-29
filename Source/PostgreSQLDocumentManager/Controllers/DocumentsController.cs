@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using PostgreSQLDocumentManager.Configuration;
 using PostgreSQLDocumentManager.Utilities;
+using System.ComponentModel.DataAnnotations;
 
 namespace PostgreSQLDocumentManager.Controllers
 {
@@ -65,6 +66,65 @@ namespace PostgreSQLDocumentManager.Controllers
 
             return File(document.Filestream, document.ContentType, document.Name);
         }
+
+        [HttpPost("{id}/permissions")]
+        [ProducesResponseType(typeof(List<CreatePermissionResponse>), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreatePermission(int id, PermissionRequest createPermissionRequest, CancellationToken cancellationToken)
+        {
+            ValidatePermissionRequest(createPermissionRequest);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            CreatePermissionResponse response;
+            if (createPermissionRequest.UserId.HasValue)
+            {
+                response = await documentService.CreateUserPermissionAsync(id, createPermissionRequest.UserId.Value, cancellationToken);
+            }
+            else
+            {
+                response = await documentService.CreateGroupPermissionAsync(id, createPermissionRequest.GroupId!.Value, cancellationToken);
+            }
+            return Ok(response);
+        }
+        
+        [HttpDelete("{id}/permissions")]
+        [ProducesResponseType(typeof(void), 204)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeletePermission(int id, PermissionRequest deletePermissionRequest, CancellationToken cancellationToken)
+        {
+            ValidatePermissionRequest(deletePermissionRequest);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            bool success;
+            if (deletePermissionRequest.UserId.HasValue)
+            {
+                success = await documentService.DeleteUserPermissionAsync(id, deletePermissionRequest.UserId.Value, cancellationToken);
+            }
+            else
+            {
+                success = await documentService.DeleteGroupPermissionAsync(id, deletePermissionRequest.GroupId!.Value, cancellationToken);
+            }
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
 
         [HttpPost]
         [ProducesResponseType(typeof(void), 200)]
@@ -176,6 +236,21 @@ namespace PostgreSQLDocumentManager.Controllers
             logger.LogDebug("File metadata received {sectionName}, {value}.", sectionName, value);
 
             fileUploadRequest.AddMetadata(sectionName, value);
+        }
+
+        private void ValidatePermissionRequest(PermissionRequest createPermissionRequest)
+        {
+            var validationResult = createPermissionRequest.Validate(new ValidationContext(createPermissionRequest));
+            if (validationResult != null)
+            {
+                foreach (var invalidField in validationResult)
+                {
+                    foreach (var invalidMemberName in invalidField.MemberNames)
+                    {
+                        ModelState.AddModelError(invalidMemberName, invalidField.ErrorMessage ?? $"Invalid field {invalidMemberName}.");
+                    }
+                }
+            }
         }
     }
 }

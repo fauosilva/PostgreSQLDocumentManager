@@ -6,12 +6,12 @@ namespace PostgreSQLDocumentManager.Authorization
 {
     public class DocumentDownloadAuthorizationHandler : AuthorizationHandler<UserGroupRequirement, int>
     {
-        private readonly IDocumentRepository documentRepository;
+        private readonly IDocumentPermissionRepository documentPermissionRepository;
         private readonly IAuthenticatedUserContext authenticatedUserContext;
 
-        public DocumentDownloadAuthorizationHandler(IDocumentRepository documentRepository, IAuthenticatedUserContext authenticatedUserContext)
+        public DocumentDownloadAuthorizationHandler(IDocumentPermissionRepository documentPermissionRepository, IAuthenticatedUserContext authenticatedUserContext)
         {
-            this.documentRepository = documentRepository;
+            this.documentPermissionRepository = documentPermissionRepository;
             this.authenticatedUserContext = authenticatedUserContext;
         }
 
@@ -26,7 +26,7 @@ namespace PostgreSQLDocumentManager.Authorization
                 return;
             }
 
-            bool canDownload = await documentRepository.CanDownloadAsync(authenticatedUserContext.GetUserId(), resourceId);
+            bool canDownload = await documentPermissionRepository.CanDownloadAsync(authenticatedUserContext.GetUserId(), resourceId);
             if (canDownload)
             {
                 context.Succeed(requirement);
