@@ -7,6 +7,56 @@
 	},
 	"item": [
 		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"adminuser\",\r\n  \"password\": \"Adminpassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/authentication/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"authentication",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Users",
 			"item": [
 				{
@@ -25,8 +75,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
-									"    pm.expect(pm.response.code).to.be(200);\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -76,8 +126,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
-									"    pm.expect(pm.response.code).to.be(200);\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -128,8 +178,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
-									"    pm.expect(pm.response.code).to.be(200);\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -188,7 +238,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
+									"pm.test(\"Successful PATCH request\", function () {\r",
 									"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]);\r",
 									"});"
 								],
@@ -249,7 +299,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
+									"pm.test(\"Successful DEL request\", function () {\r",
 									"    pm.expect(pm.response.code).to.be.oneOf([204, 404]);\r",
 									"});"
 								],
@@ -297,6 +347,296 @@
 			]
 		},
 		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "Groups",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/groups",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups/{id}",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/groups/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"groups",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"sample\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/groups",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups/{id}",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful PATCH request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomBsNoun}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/groups/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"groups",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups/{id}",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful DEL request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([204, 404]);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/groups/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"groups",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Documents",
 			"item": [
 				{
@@ -315,8 +655,111 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Successful POST request\", function () {\r",
-									"    pm.expect(pm.response.code).to.be(200);\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/documents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Documents/{id}",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/documents/16",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Documents",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -346,7 +789,7 @@
 								},
 								{
 									"key": "description",
-									"value": "sampledescription",
+									"value": "{{$randomCatchPhraseDescriptor}}",
 									"type": "text"
 								},
 								{
@@ -384,10 +827,32 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"var bearerToken = pm.collectionVariables.get('bearerToken')",
+					"var bearerToken = pm.collectionVariables.get('bearerToken');",
 					"",
 					"if(!bearerToken)",
 					"{",
+					"   generateJwtToken();",
+					"}",
+					"else",
+					"{    ",
+					"    let jwt = bearerToken;",
+					"    let [jwtHeader, jwtPayload, jwtSignature] = jwt.split('.')",
+					"    let jwtPayloadJsonString = atob(jwtPayload);",
+					"    //console.log(jwtPayloadJsonString);",
+					"",
+					"    if(jwtPayloadJsonString){",
+					"        var jsonPayload = JSON.parse(jwtPayloadJsonString);",
+					"        var currentDate = Math.floor(new Date().getTime()/1000);",
+					"        ",
+					"        var exp = jsonPayload.exp;        ",
+					"        if( exp < currentDate){            ",
+					"            console.log(\"Token expired.\");",
+					"            generateJwtToken();",
+					"        }",
+					"    }",
+					"}",
+					"",
+					"function generateJwtToken(){",
 					"    console.log(\"Generating a new jwt token\");",
 					"    var baseUrl = pm.collectionVariables.get(\"baseUrl\");",
 					"",

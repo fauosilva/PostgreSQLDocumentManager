@@ -78,4 +78,5 @@
 	- [ ] Implement refresh token.
 - File Upload Security
 	- [ ] Improve file extension validation by checking file signature. [link](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-7.0#file-signature-validation)
-
+- Hosting
+    - [ ] Implement health check
