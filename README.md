@@ -39,14 +39,30 @@
  - Requirements
 	- docker-compose
  - Instructions
-    - Open the project using your favorite terminal
-	- Execute docker-compose to create a new container with the PostgreSQL database
-	  - Wait for the compose to finish
-	- Execute the project using dotnet run OR start the project using your favorite IDE.
+    - Open the project folder using your favorite terminal.
+	- Execute docker-compose (docker-compose up) to create a new container with the PostgreSQL database
+	  - Wait for the compose to finish and startup the PostgreSQL databas.
+	- Configure project secrets using CLI or using your favorite IDE
 
-## Development Environment
+```json
+{
+  "Jwt": {
+    "Key": "{secrets.json}",
+    "Issuer": "{secrets.json}",
+    "Audience": "{secrets.json}"
+  },
+  "AWS": {
+    "S3": {
+      "Region": "{secrets.json}",
+      "BucketName": "{secrets.json}",
+      "AccessKeyId": "{secrets.json}",
+      "AccessKeySecret": "{secrets.json}"
+    }
+  }
+}
+```
 
-- Public URL
+- Execute the project using dotnet run OR start the project using your favorite IDE.
 
 
 --- 
@@ -59,5 +75,7 @@
 	- [ ] Return list of entities using pagination.
 - Security
     - [ ] Rate limit on login requests based on origin.
-- File Upload
-	- [ ] Filter file extensions and other file upload validations.
+	- [ ] Implement refresh token.
+- File Upload Security
+	- [ ] Improve file extension validation by checking file signature. [link](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-7.0#file-signature-validation)
+
