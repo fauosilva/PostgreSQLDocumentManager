@@ -18,7 +18,8 @@
 5. Services
 	1. Single database operations using the repository layer are not using the transaction block, or unit of work pattern since PostgreSQL MVCC actually handle those statements into a implicit transaction.
 6. Repositories / Database
-	1. Database unique constraints are used to mantain integrity of the entities. 
+	1. Database unique constraints are used to mantain integrity of the entities.
+	2. Unique indexes were not created to avoid index duplication. [Link](https://www.postgresql.org/docs/current/indexes-unique.html#:~:text=PostgreSQL%20automatically%20creates%20a%20unique,mechanism%20that%20enforces%20the%20constraint.)
 
 ## Database decisions
 
@@ -80,3 +81,11 @@
 	- [ ] Improve file extension validation by checking file signature. [link](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-7.0#file-signature-validation)
 - Hosting
     - [ ] Implement health check
+
+## Requirements
+- Database
+    - [ ] Create stored procedures to implement some functionalities such as returning user ability to download a file based on the database table.
+- Unit test
+    - [ ] Cover project with unit tests
+- End to end tests
+    - [ ] Create end to end test scenario
