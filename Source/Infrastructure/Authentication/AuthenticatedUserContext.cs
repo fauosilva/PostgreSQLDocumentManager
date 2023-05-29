@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Constants;
+using ApplicationCore.Exceptions;
 using ApplicationCore.Interfaces.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -8,7 +9,7 @@ namespace Infrastructure.Authentication
     public class AuthenticatedUserContext : IAuthenticatedUserContext
     {
         private readonly IHttpContextAccessor httpContextAcessor;
-        private string? userId;
+        private int? userId;
         private string? userName;
         private string? role;
 
@@ -17,22 +18,36 @@ namespace Infrastructure.Authentication
             httpContextAcessor = httpContext;
         }
 
-        public string GetUserId()
+        public int GetUserId()
         {
-            return userId ??= httpContextAcessor.HttpContext.User.FindFirstValue(UserClaimsConstants.UserId) 
-                ?? throw new Exception("Unable to find current user id");
+            if (userId == null)
+            {
+                if (!int.TryParse(httpContextAcessor.HttpContext.User.FindFirstValue(UserClaimsConstants.UserId), out int id))
+                    throw new ServiceException("Unable to find current user id");
+
+                userId = id;
+            }
+            return userId.Value;
         }
 
         public string GetUserName()
         {
-            return userName ??= httpContextAcessor.HttpContext.User.FindFirstValue(UserClaimsConstants.UserName) 
-                ?? throw new Exception("Unable to find current user name");
+            return userName ??= httpContextAcessor.HttpContext.User.FindFirstValue(UserClaimsConstants.UserName)
+                ?? throw new ServiceException("Unable to find current user name");
         }
 
         public string GetUserRole()
         {
-            return role ??= httpContextAcessor.HttpContext.User.FindFirstValue(UserClaimsConstants.Role) 
-                ?? throw new Exception("Unable to find current user role");
+            if (role == null)
+            {
+                var claimsPrincipal = httpContextAcessor.HttpContext.User;
+                var userRole = claimsPrincipal.FindFirstValue(UserClaimsConstants.Role) ?? claimsPrincipal.FindFirstValue(ClaimsIdentity.DefaultRoleClaimType);
+                if (!string.IsNullOrEmpty(userRole))
+                {
+                    role = userRole;                    
+                }
+            }
+            return role ?? throw new ServiceException("Unable to find current user role");
         }
     }
 }

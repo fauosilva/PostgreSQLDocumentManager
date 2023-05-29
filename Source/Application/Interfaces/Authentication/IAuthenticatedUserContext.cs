@@ -2,8 +2,8 @@
 {
     public interface IAuthenticatedUserContext
     {
-        string GetUserName();
-        string GetUserId();
+        int GetUserId();
+        string GetUserName();        
         string GetUserRole();
     }
 }

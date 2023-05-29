@@ -133,5 +133,21 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             logger.LogDebug("Returning {selectedRecord} documents.", selectedRecords.Count());
             return selectedRecords;
         }
+
+        public async Task<bool> CanDownloadAsync(int userId, int documentId, CancellationToken cancellationToken = default)
+        {
+            await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
+
+            string sql = "SELECT 1 FROM document_permissions WHERE document_permissions.user_id = @UserId AND document_permissions.document_id = @DocumentId " +
+                "UNION " +
+                "SELECT 1 from user_groups INNER JOIN document_permissions on document_permissions.group_id = user_groups.group_id WHERE document_permissions.document_id = @DocumentId AND user_groups.user_id = @UserId";
+            var parameters = new { userId, documentId };
+            var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+
+            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<int>(command), cancellationToken);
+            logger.LogDebug("User {userId} permission check to download document {documentId} returned: {selectedRecords}.", userId, documentId, selectedRecords.Any());
+
+            return selectedRecords.Any();            
+        }
     }
 }

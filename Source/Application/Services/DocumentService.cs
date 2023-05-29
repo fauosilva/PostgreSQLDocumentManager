@@ -23,8 +23,7 @@ namespace ApplicationCore.Services
 
         public async Task<DownloadDocumentResponse> DownloadFileAsync(int id, CancellationToken cancellationToken = default)
         {
-            var existingDocument = await documentRepository.GetAsync(id, cancellationToken);
-            //Todo: check if document was properly uploaded
+            var existingDocument = await documentRepository.GetAsync(id, cancellationToken);            
             if (existingDocument == null || !existingDocument.Uploaded)
             {
                 throw new ServiceException($"File was not found or not properly uploaded.");
@@ -64,12 +63,9 @@ namespace ApplicationCore.Services
                 }
 
                 logger.LogInformation("Updating file uploaded information");
-                var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken);
-                if (udpatedDocument == null)
-                {
-                    throw new ServiceException("File was created and uploaded, uploaded flag was not set.");                    
-                }
-
+                var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken) 
+                    ?? throw new ServiceException("File was created and uploaded, uploaded flag was not set.");
+                
                 return new CreateDocumentResponse(udpatedDocument);
             }
             catch (Exception ex)

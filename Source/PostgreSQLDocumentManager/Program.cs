@@ -1,9 +1,11 @@
 using ApplicationCore.Exceptions;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
+using PostgreSQLDocumentManager.Authorization;
 using PostgreSQLDocumentManager.DependencyInjection;
 using System.Text.Json.Serialization;
 
@@ -60,6 +62,15 @@ builder.Services.Configure<FormOptions>(options =>
 {    
     options.MultipartBodyLengthLimit = 128 * 1024 * 1024; // if don't set default value is: 128 MB
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("DocumentDownloadPolicy", policy =>
+        policy.Requirements.Add(new UserGroupRequirement()));
+});
+
+builder.Services.AddScoped<IAuthorizationHandler, DocumentDownloadAuthorizationHandler>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

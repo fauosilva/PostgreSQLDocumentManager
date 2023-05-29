@@ -21,12 +21,14 @@ namespace PostgreSQLDocumentManager.Controllers
     {
         private readonly ILogger<DocumentsController> logger;
         private readonly IDocumentService documentService;
+        private readonly IAuthorizationService authorizationService;
         private readonly IOptions<FileUploadConfiguration> options;
 
-        public DocumentsController(ILogger<DocumentsController> logger, IDocumentService documentService, IOptions<FileUploadConfiguration> options)
+        public DocumentsController(ILogger<DocumentsController> logger, IDocumentService documentService, IAuthorizationService authorizationService, IOptions<FileUploadConfiguration> options)
         {
             this.logger = logger;
             this.documentService = documentService;
+            this.authorizationService = authorizationService;
             this.options = options;
         }
 
@@ -47,9 +49,15 @@ namespace PostgreSQLDocumentManager.Controllers
         [ProducesResponseType(typeof(void), 401)]
         [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager,User")]
         public async Task<IActionResult> DownloadDocument(int id, CancellationToken cancellationToken)
         {
+            var authorizationResult = await authorizationService.AuthorizeAsync(User, id, "DocumentDownloadPolicy");
+            if (authorizationResult.Failure != null)
+            {
+                return Forbid();
+            }
+
             var document = await documentService.DownloadFileAsync(id, cancellationToken);
 
             if (document == null)
