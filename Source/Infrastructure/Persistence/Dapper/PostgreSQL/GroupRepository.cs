@@ -93,15 +93,29 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "SELECT id, name, inserted_at, inserted_by, updated_at, updated_by FROM groups";
+            string sql = "SELECT g.id, g.name, g.inserted_at, g.inserted_by, g.updated_at, g.updated_by ," +
+                "u.user_id, u.group_id, u.inserted_at, u.inserted_by, u.updated_at, u.updated_by " +
+                "FROM groups g left outer join user_groups u ON g.id = u.group_id";
             var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
 
-            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<Group>(command), cancellationToken);
-            if (selectedRecords != null)
-            {
-                logger.LogDebug("Returning {selectedRecord} groups.", selectedRecords.Count());
-            }
-            return selectedRecords;
+            Dictionary<int, Group> resultCache = new();
+            _ = await ExecuteWithRetryOnTransientErrorAsync(() =>
+                connection.QueryAsync<Group, UserGroup, Group>(command, (group, userGroup) =>
+                {
+                    if (!resultCache.ContainsKey(group.Id))
+                    {
+                        resultCache.Add(group.Id, group);
+                    }
+                    Group cachedParent = resultCache[group.Id];
+                    cachedParent.Users ??= new List<UserGroup>();
+                    cachedParent.Users.Add(userGroup);
+
+                    return cachedParent;
+                }, splitOn: "user_id"), cancellationToken);
+
+
+            logger.LogDebug("Returning {selectedRecord} groups.", resultCache.Values.Count);
+            return resultCache.Values;
         }
 
         /// <summary>

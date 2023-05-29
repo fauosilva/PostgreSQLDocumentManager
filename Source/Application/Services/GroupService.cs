@@ -13,11 +13,13 @@ namespace ApplicationCore.Services
 
         private readonly ILogger<GroupService> logger;
         private readonly IGroupRepository groupRepository;
+        private readonly IUserGroupRepository userGroupRepository;
 
-        public GroupService(ILogger<GroupService> logger, IGroupRepository groupRepository)
+        public GroupService(ILogger<GroupService> logger, IGroupRepository groupRepository, IUserGroupRepository userGroupRepository)
         {
             this.logger = logger;
             this.groupRepository = groupRepository;
+            this.userGroupRepository = userGroupRepository;
         }
 
         public async Task<bool> DeleteGroupAsync(int id, CancellationToken cancellationToken = default)
@@ -72,7 +74,7 @@ namespace ApplicationCore.Services
         public async Task<GroupResponse?> UpdateGroupAsync(int id, string name, CancellationToken cancellationToken = default)
         {
             try
-            {               
+            {
                 var group = await groupRepository.UpdateAsync(id, name, cancellationToken);
                 if (group != null)
                 {
@@ -87,6 +89,19 @@ namespace ApplicationCore.Services
                 logger.LogError(ex, UnexpectedErrorOnUpdate);
                 throw new ServiceException(UnexpectedErrorOnUpdate, ex);
             }
+        }
+
+        public async Task<CreateUserGroupResponse> AddUserAsync(int id, int userId, CancellationToken cancellationToken = default)
+        {
+            _ = await groupRepository.GetAsync(id, cancellationToken) ?? throw new ServiceException($"Group with {id} does not exist.");
+            var result = await userGroupRepository.AddUserToGroupAsync(id, userId, cancellationToken);
+            return new CreateUserGroupResponse(result);
+        }
+
+        public async Task<bool> RemoveUserAsync(int id, int userId, CancellationToken cancellationToken = default)
+        {
+            _ = await groupRepository.GetAsync(id, cancellationToken) ?? throw new ServiceException($"Group with {id} does not exist.");
+            return await userGroupRepository.RemoveUserFromGroupAsync(id, userId, cancellationToken);
         }
     }
 }

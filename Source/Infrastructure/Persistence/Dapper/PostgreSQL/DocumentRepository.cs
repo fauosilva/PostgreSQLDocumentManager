@@ -17,7 +17,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         private readonly DbDataSource dbDataSource;
         private readonly IAuthenticatedUserContext authenticatedUserContext;
 
-        public DocumentRepository(ILogger<DocumentRepository> logger, DbDataSource dbDataSource, IAuthenticatedUserContext authenticatedUserContext ) : base(logger)
+        public DocumentRepository(ILogger<DocumentRepository> logger, DbDataSource dbDataSource, IAuthenticatedUserContext authenticatedUserContext) : base(logger)
         {
             this.logger = logger;
             this.dbDataSource = dbDataSource;
@@ -69,14 +69,12 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         }
 
         /// <summary>
-        /// Update document uploaded status into database.
-        /// Returns null in case of non-existing document id.
-        /// Throws exceptions in case of database errors and constraint violations.
+        /// Update document uploaded status into database.     
         /// </summary>
         /// <param name="id">Document id</param>
         /// <param name="uploaded">Uploaded flag</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns></returns>
+        /// <returns>Returns null in case of non-existing document id. Throws exceptions in case of database errors and constraint violations</returns>
         public async Task<Document?> UpdateUploadedStatusAsync(int id, bool uploaded, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
@@ -101,7 +99,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         /// </summary>
         /// <param name="id">Document id</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Document</returns>
+        /// <returns>Document if exists, otherwise null</returns>
         public async Task<Document?> GetAsync(int id, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
@@ -116,22 +114,38 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         }
 
         /// <summary>
-        /// Return all documents from database.
-        /// Returns null in case of non-existing entities
+        /// Return all documents from database.        
         /// </summary>
         /// <param name="id">Document id</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>List of documents</returns>
+        /// <returns>List of documents. Returns null in case of non-existing entities</returns>
         public async Task<IEnumerable<Document>?> GetAllAsync(CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
 
-            string sql = "SELECT id, name, description, category, keyname, uploaded, inserted_at, inserted_by, updated_at, updated_by FROM documents";
+            string sql = "SELECT d.id, d.name, d.description, d.category, d.keyname, d.uploaded, d.inserted_at, d.inserted_by, d.updated_at, d.updated_by, " +
+                "p.id, p.document_id, p.user_id, p.group_id, p.inserted_at, p.inserted_by, p.updated_at, p.updated_by " +
+                "FROM documents d LEFT OUTER JOIN document_permissions p ON d.id = p.document_id";
             var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
 
-            var selectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.QueryAsync<Document>(command), cancellationToken);
-            logger.LogDebug("Returning {selectedRecord} documents.", selectedRecords.Count());
-            return selectedRecords;
-        }       
+            Dictionary<int, Document> resultCache = new();
+            _ = await ExecuteWithRetryOnTransientErrorAsync(() =>
+                connection.QueryAsync<Document, DocumentPermission, Document>(command, (document, permission) =>
+                {
+                    if (!resultCache.ContainsKey(document.Id))
+                    {
+                        resultCache.Add(document.Id, document);
+                    }
+                    Document cachedParent = resultCache[document.Id];
+                    cachedParent.Permissions ??= new List<DocumentPermission>();
+                    cachedParent.Permissions.Add(permission);
+
+                    return cachedParent;
+                }, splitOn: "id"), cancellationToken);
+
+
+            logger.LogDebug("Returning {selectedRecord} documents.", resultCache.Values.Count);
+            return resultCache.Values;
+        }
     }
 }

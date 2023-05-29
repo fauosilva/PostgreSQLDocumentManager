@@ -22,7 +22,7 @@ namespace PostgreSQLDocumentManager.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<UserResponse>), 200)]
+        [ProducesResponseType(typeof(List<GroupResponse>), 200)]
         [ProducesResponseType(typeof(void), 401)]
         [ProducesResponseType(typeof(void), 403)]
         [ProducesResponseType(typeof(ProblemDetails), 500)]
@@ -68,7 +68,7 @@ namespace PostgreSQLDocumentManager.Controllers
         }
 
         [HttpPatch("{id}")]
-        [ProducesResponseType(typeof(UserResponse), 200)]
+        [ProducesResponseType(typeof(GroupResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
         [ProducesResponseType(typeof(void), 401)]
         [ProducesResponseType(typeof(void), 403)]
@@ -102,6 +102,44 @@ namespace PostgreSQLDocumentManager.Controllers
         public async Task<IActionResult> DeleteGroup(int id, CancellationToken cancellationToken)
         {
             var success = await groupService.DeleteGroupAsync(id, cancellationToken);
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPost("{id}/users")]
+        [ProducesResponseType(typeof(CreateUserGroupResponse), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddUser(int id, UserGroupRequest createPermissionRequest, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await groupService.AddUserAsync(id, createPermissionRequest.UserId, cancellationToken);
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}/users")]
+        [ProducesResponseType(typeof(void), 204)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoveUser(int id, UserGroupRequest removeUserRequest, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await groupService.RemoveUserAsync(id, removeUserRequest.UserId, cancellationToken);
 
             if (!success)
                 return NotFound();

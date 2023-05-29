@@ -66,66 +66,7 @@ namespace PostgreSQLDocumentManager.Controllers
 
             return File(document.Filestream, document.ContentType, document.Name);
         }
-
-        [HttpPost("{id}/permissions")]
-        [ProducesResponseType(typeof(List<CreatePermissionResponse>), 200)]
-        [ProducesResponseType(typeof(void), 401)]
-        [ProducesResponseType(typeof(void), 403)]
-        [ProducesResponseType(typeof(ProblemDetails), 500)]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreatePermission(int id, PermissionRequest createPermissionRequest, CancellationToken cancellationToken)
-        {
-            ValidatePermissionRequest(createPermissionRequest);
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            CreatePermissionResponse response;
-            if (createPermissionRequest.UserId.HasValue)
-            {
-                response = await documentService.CreateUserPermissionAsync(id, createPermissionRequest.UserId.Value, cancellationToken);
-            }
-            else
-            {
-                response = await documentService.CreateGroupPermissionAsync(id, createPermissionRequest.GroupId!.Value, cancellationToken);
-            }
-            return Ok(response);
-        }
-        
-        [HttpDelete("{id}/permissions")]
-        [ProducesResponseType(typeof(void), 204)]
-        [ProducesResponseType(typeof(void), 401)]
-        [ProducesResponseType(typeof(void), 403)]
-        [ProducesResponseType(typeof(ProblemDetails), 500)]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeletePermission(int id, PermissionRequest deletePermissionRequest, CancellationToken cancellationToken)
-        {
-            ValidatePermissionRequest(deletePermissionRequest);
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            bool success;
-            if (deletePermissionRequest.UserId.HasValue)
-            {
-                success = await documentService.DeleteUserPermissionAsync(id, deletePermissionRequest.UserId.Value, cancellationToken);
-            }
-            else
-            {
-                success = await documentService.DeleteGroupPermissionAsync(id, deletePermissionRequest.GroupId!.Value, cancellationToken);
-            }
-
-            if (!success)
-                return NotFound();
-
-            return NoContent();
-        }
-
-
+       
         [HttpPost]
         [ProducesResponseType(typeof(void), 200)]
         [ProducesResponseType(typeof(void), 401)]
@@ -187,6 +128,64 @@ namespace PostgreSQLDocumentManager.Controllers
                 logger.LogError(exception, "An exception was thrown: {message}", exception.Message);
                 return Problem("Unable to upload file.");
             }
+        }
+
+        [HttpPost("{id}/permissions")]
+        [ProducesResponseType(typeof(List<CreatePermissionResponse>), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreatePermission(int id, PermissionRequest createPermissionRequest, CancellationToken cancellationToken)
+        {
+            ValidatePermissionRequest(createPermissionRequest);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            CreatePermissionResponse response;
+            if (createPermissionRequest.UserId.HasValue)
+            {
+                response = await documentService.CreateUserPermissionAsync(id, createPermissionRequest.UserId.Value, cancellationToken);
+            }
+            else
+            {
+                response = await documentService.CreateGroupPermissionAsync(id, createPermissionRequest.GroupId!.Value, cancellationToken);
+            }
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}/permissions")]
+        [ProducesResponseType(typeof(void), 204)]
+        [ProducesResponseType(typeof(void), 401)]
+        [ProducesResponseType(typeof(void), 403)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeletePermission(int id, PermissionRequest deletePermissionRequest, CancellationToken cancellationToken)
+        {
+            ValidatePermissionRequest(deletePermissionRequest);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            bool success;
+            if (deletePermissionRequest.UserId.HasValue)
+            {
+                success = await documentService.DeleteUserPermissionAsync(id, deletePermissionRequest.UserId.Value, cancellationToken);
+            }
+            else
+            {
+                success = await documentService.DeleteGroupPermissionAsync(id, deletePermissionRequest.GroupId!.Value, cancellationToken);
+            }
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
         }
 
         private ObjectResult? ValidateContentDisposition(MultipartSection section, string? headerContentType)

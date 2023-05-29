@@ -27,8 +27,9 @@ namespace PostgreSQLDocumentManager.DependencyInjection
         }
 
         public static void AddRepositories(this IServiceCollection serviceCollection)
-        {
+        {            
             serviceCollection.AddScoped<IGroupRepository, GroupRepository>();
+            serviceCollection.AddScoped<IUserGroupRepository, UserGroupsRepository>();
             serviceCollection.AddScoped<IFileRepository, FileRepository>();
             serviceCollection.AddScoped<IUserRepository, UserRepository>();
             serviceCollection.AddScoped<IDocumentRepository, DocumentRepository>();
