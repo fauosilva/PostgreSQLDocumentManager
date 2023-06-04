@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Postman", "Postman", "{6850
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EndToEndTests", "EndToEndTests", "{EB0638D6-8512-4D12-9EC0-F01F377A0F1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndToEndTests", "Tests\EndToEndTests\EndToEndTests.csproj", "{12070479-FF54-42FB-A9A3-280F5515111A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EndToEndTests", "Tests\EndToEndTests\EndToEndTests.csproj", "{12070479-FF54-42FB-A9A3-280F5515111A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

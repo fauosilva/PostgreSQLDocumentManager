@@ -4,6 +4,8 @@ namespace ApplicationCore.Dtos.Responses
 {
     public record CreateUserResponse : AuditableEntityDto<int>
     {
+        public CreateUserResponse() { }
+
         public CreateUserResponse(User user)
         {
             Id = user.Id;

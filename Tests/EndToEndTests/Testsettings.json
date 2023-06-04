@@ -1,0 +1,10 @@
+{
+  "Api": {
+    "Url": "http://localhost:5129",
+    "AdminUser": "adminuser",
+    "AdminPassword": "Adminpassword"
+  },
+  "ConnectionStrings": {
+    "DocumentManager": "Server=127.0.0.1;Port=5432;Database=documentmanager;Userid=postgres;Password=Postgres2023!;Pooling=true;MinPoolSize=1;MaxPoolSize=20;"
+  }
+}

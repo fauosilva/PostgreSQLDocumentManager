@@ -74,9 +74,11 @@
     - [ ] Implement log scopes to enrich the logged information.
 - API Design
 	- [ ] Return list of entities using pagination.
+	- [ ] Revoke document permissions.
 - Security
     - [ ] Rate limit on login requests based on origin.
 	- [ ] Implement refresh token.
+	- [ ] Enfoce HTTPS traffic.
 - File Upload Security
 	- [ ] Improve file extension validation by checking file signature. [link](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-7.0#file-signature-validation)
 - Hosting

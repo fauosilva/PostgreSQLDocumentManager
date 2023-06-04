@@ -1,5 +1,6 @@
 ﻿Feature: FileUpload
 
+@Cleanup
 Scenario: User should be able to download file after being set download permissions
 	And an user with role was created
 		| userName | userPassword     | role |
@@ -10,15 +11,14 @@ Scenario: User should be able to download file after being set download permissi
 	And a file was uploaded by the Admin user
 		| fileName   | name   | description           | category       | mimeType  |
 		| sample.png | sample | testSampleDescription | sampleCategory | image/png |
-	And the created user was given direct access to the file
-		| fileName   | userName |
-		| sample.png | testUser |
+	And the created user was given direct access to the uploaded file
 	When the created user attempts to download the file
-	Then the created user should exist on the database	
-	And the created user should have access granted to the file on the database
-	And the created user should be able to download the file
+	Then the created user should be able to download the file
 		| fileName   | mimeType  |
 		| sample.png | image/png |
+	And the created user should exist on the database
+	And the created user should have access granted to the file on the database
+	
 	
 
 Scenario: User should be able to download file after being set download permissions through a group
@@ -39,11 +39,12 @@ Scenario: User should be able to download file after being set download permissi
 		| fileName   | groupName |
 		| sample.png | sample    |
 	When the created user attempts to download the file
-	Then the created user should exist on the database
+	Then the created user should be able to download the file
+		| fileName   | mimeType  |
+		| sample.png | image/png |
+	And the created user should exist on the database
 	And the created group should exist on the database
 	And the user should be associated with the group on the database
 	And the created group should have access granted to the file on the database
-	And the created user should be able to download the file
-		| fileName   | mimeType  |
-		| sample.png | image/png |
+	
 	

@@ -1,5 +1,9 @@
-using System;
-using TechTalk.SpecFlow;
+using ApplicationCore.Dtos.Responses;
+using EndToEndTests.Configuration;
+using EndToEndTests.Constants;
+using EndToEndTests.Tables;
+using Npgsql;
+using TechTalk.SpecFlow.Assist;
 
 namespace EndToEndTests.StepDefinitions
 {
@@ -7,58 +11,106 @@ namespace EndToEndTests.StepDefinitions
     public class FileUploadStepDefinitions
     {
         private readonly ScenarioContext scenarioContext;
+        private readonly FeatureContext featureContext;
+        private readonly RestApiHttpClient restApiHttpClient;
+        private readonly NpgsqlDataSource npgsqlDataSource;
 
-        public FileUploadStepDefinitions(ScenarioContext scenarioContext)
+
+        public FileUploadStepDefinitions(ScenarioContext scenarioContext, FeatureContext featureContext)
         {
             this.scenarioContext = scenarioContext;
+            this.featureContext = featureContext;
+            var testSettings = featureContext.Get<TestSettings>(BeforeFeature.TestSettings);
+            var httpClient = featureContext.Get<HttpClient>(BeforeFeature.FeatureContextHttpClient);
+            restApiHttpClient = new RestApiHttpClient(httpClient, testSettings);
+            npgsqlDataSource = featureContext.Get<NpgsqlDataSource>(BeforeFeature.DataSource);
         }
 
         [Given(@"an user with role was created")]
-        public void GivenAnUserWithRoleWasCreated(Table table)
+        public async Task GivenAnUserWithRoleWasCreated(Table table)
         {
-            throw new PendingStepException();
+            var createUserRequest = table.CreateInstance<UserNameCreationTable>().ToRequest();
+            var response = await restApiHttpClient.CreateUserAsync(createUserRequest);
+            response.Should().NotBeNull();
+            response.Id.Should().BePositive();
+            response.Username.Should().Be(createUserRequest.Username);
+            response.Role.Should().Be(createUserRequest.Role.ToString());
+            response.InsertedAt.Should().BeAfter(DateTime.UtcNow.AddSeconds(-10));
+            response.InsertedBy.Should().NotBeNullOrEmpty();
+
+            scenarioContext.Add(ScenarioContextConstants.CreateUserResponse, response);
         }
 
         [Given(@"a JWT token was generated for the created user with their credentials")]
-        public void GivenAJWTTokenWasGeneratedForTheCreatedUserWithTheirCredentials(Table table)
+        public async Task GivenAJWTTokenWasGeneratedForTheCreatedUserWithTheirCredentials(Table table)
         {
-            throw new PendingStepException();
+            var loginRequest = table.CreateInstance<UserNameCredentialsTable>().ToRequest();
+            var jwtToken = await restApiHttpClient.GenerateJwtAsync(loginRequest);
+            scenarioContext.Add("userJwt", jwtToken.JwtToken);
         }
 
         [Given(@"a file was uploaded by the Admin user")]
-        public void GivenAFileWasUploadedByTheAdminUser(Table table)
+        public async Task GivenAFileWasUploadedByTheAdminUser(Table table)
         {
-            throw new PendingStepException();
+            var fileUploadRequest = table.CreateInstance<FileUploadRequestTable>().ToRequest();
+            var fileUploadResponse = await restApiHttpClient.FileUploadAsync(fileUploadRequest);
+            scenarioContext.Add(ScenarioContextConstants.CreateDocumentResponse, fileUploadResponse);
         }
 
-        [Given(@"the created user was given direct access to the file")]
-        public void GivenTheCreatedUserWasGivenDirectAccessToTheFile(Table table)
+        [Given(@"the created user was given direct access to the uploaded file")]
+        public async Task GivenTheCreatedUserWasGivenDirectAccessToTheUploadedFile()
         {
-            throw new PendingStepException();
+            var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
+            var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
+            await restApiHttpClient.AddUserPermissionAsync(createdDocument.Id, createdUser.Id);
         }
 
         [When(@"the created user attempts to download the file")]
-        public void WhenTheCreatedUserAttemptsToDownloadTheFile()
+        public async Task WhenTheCreatedUserAttemptsToDownloadTheFile()
         {
-            throw new PendingStepException();
+            var userJwt = scenarioContext.Get<string>("userJwt");
+            var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
+            var downloadStream = await restApiHttpClient.DownloadDocumentAsync(createdDocument.Id, userJwt);
+            scenarioContext.Add("downloadDocument", downloadStream);
         }
 
         [Then(@"the created user should exist on the database")]
         public void ThenTheCreatedUserShouldExistOnTheDatabase()
         {
-            throw new PendingStepException();
+            var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
+
+            using var connection = npgsqlDataSource.OpenConnection();
+            using var cmd = new NpgsqlCommand("SELECT 1 FROM users WHERE id = @p1", connection);
+            cmd.Parameters.AddWithValue("p1",  createdUser.Id);           
+            int? returnValue = (int?)cmd.ExecuteScalar();
+            returnValue.Should().Be(1);
         }
 
         [Then(@"the created user should have access granted to the file on the database")]
         public void ThenTheCreatedUserShouldHaveAccessGrantedToTheFileOnTheDatabase()
         {
-            throw new PendingStepException();
+            var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
+            var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
+
+            using var connection = npgsqlDataSource.OpenConnection();
+            using var cmd = new NpgsqlCommand("SELECT 1 FROM document_permissions WHERE user_id = @p1 AND document_id = @p2", connection)
+            {
+                Parameters =
+                {
+                    new("p1", createdUser.Id),
+                    new("p2", createdDocument.Id)
+                }
+            };
+            int? returnValue = (int?)cmd.ExecuteScalar();
+            returnValue.Should().Be(1);
         }
 
         [Then(@"the created user should be able to download the file")]
         public void ThenTheCreatedUserShouldBeAbleToDownloadTheFile(Table table)
         {
-            throw new PendingStepException();
+            var downloadStream = scenarioContext.Get<Stream>("downloadDocument");
+            downloadStream.Should().NotBeNull();
+            downloadStream.Dispose();
         }
 
         [Given(@"and a group with name '([^']*)' was created")]
@@ -96,5 +148,6 @@ namespace EndToEndTests.StepDefinitions
         {
             throw new PendingStepException();
         }
+
     }
 }

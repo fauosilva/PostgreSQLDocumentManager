@@ -4,6 +4,8 @@ namespace ApplicationCore.Dtos.Responses
 {
     public record CreateDocumentResponse : AuditableEntityDto<int>
     {
+        public CreateDocumentResponse() { }
+
         public CreateDocumentResponse(Document document)
         {
             Id = document.Id;

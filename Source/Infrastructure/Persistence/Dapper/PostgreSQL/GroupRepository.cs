@@ -5,6 +5,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
+using System.Transactions;
 
 namespace Infrastructure.Persistence.Dapper.PostgreSQL
 {
@@ -52,14 +53,40 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
         public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);
+            using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
-            string sql = "DELETE FROM groups WHERE id = @id";
-            var parameters = new { id };
-            var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+            try
+            {
+                string sqlUserGroups = "DELETE FROM user_groups WHERE group_id = @id";
+                var parametersUserGroups = new { id };
+                var commandUserGroups = new CommandDefinition(sqlUserGroups, parametersUserGroups, transaction, cancellationToken: cancellationToken);
 
-            var affectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(command), cancellationToken);
-            logger.LogDebug("Number of records deleted {affectedRecords}", affectedRecords);
-            return affectedRecords > 0;
+                var deletedGroupAssociations = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(commandUserGroups), cancellationToken);
+                logger.LogDebug("Number of associations deleted {affectedRecords}", deletedGroupAssociations);
+
+                string sqlPermissions = "DELETE FROM document_permissions WHERE group_id = @id";
+                var parametersPermissions = new { id };
+                var commandPermissions = new CommandDefinition(sqlPermissions, parametersPermissions, transaction, cancellationToken: cancellationToken);
+
+                var deletedDocumentPermissions = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(commandPermissions), cancellationToken);
+                logger.LogDebug("Number of permissions deleted {affectedRecords}", deletedDocumentPermissions);
+
+                string sql = "DELETE FROM groups WHERE id = @id";
+                var parameters = new { id };
+                var command = new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken);
+
+                var affectedRecords = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(command), cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+                logger.LogDebug("Number of records deleted {affectedRecords}", affectedRecords);
+                return affectedRecords > 0;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected exception deleting user groups");
+                await transaction.RollbackAsync(cancellationToken);
+                return false;
+            }
         }
 
         /// <summary>
