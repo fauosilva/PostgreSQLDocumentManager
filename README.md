@@ -42,7 +42,8 @@
  - Instructions
     - Open the project folder using your favorite terminal.
 	- Execute docker-compose (docker-compose up) to create a new container with the PostgreSQL database
-	  - Wait for the compose to finish and startup the PostgreSQL databas.
+	  - Wait for the compose to finish and startup the PostgreSQL database.
+	    - The seed data will include an Admin user with simple credentials (Username = adminuser / Password = Adminpassword)
 	- Configure project secrets using CLI or using your favorite IDE
 
 ```json
@@ -62,6 +63,7 @@
   }
 }
 ```
+
 
 - Execute the project using dotnet run OR start the project using your favorite IDE.
 
@@ -86,8 +88,8 @@
 
 ## Requirements
 - Database
-    - [ ] Create stored procedures to implement some functionalities such as returning user ability to download a file based on the database table.
+    - [x] Create stored procedures to implement some functionalities.
 - Unit test
-    - [ ] Cover project with unit tests
+    - [x] Cover project with unit tests
 - End to end tests
-    - [ ] Create end to end test scenario
+    - [x] Create end to end test scenario

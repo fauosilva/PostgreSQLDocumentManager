@@ -57,13 +57,6 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
             try
             {
-                string sqlUserGroups = "DELETE FROM user_groups WHERE group_id = @id";
-                var parametersUserGroups = new { id };
-                var commandUserGroups = new CommandDefinition(sqlUserGroups, parametersUserGroups, transaction, cancellationToken: cancellationToken);
-
-                var deletedGroupAssociations = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(commandUserGroups), cancellationToken);
-                logger.LogDebug("Number of associations deleted {affectedRecords}", deletedGroupAssociations);
-
                 string sqlPermissions = "DELETE FROM document_permissions WHERE group_id = @id";
                 var parametersPermissions = new { id };
                 var commandPermissions = new CommandDefinition(sqlPermissions, parametersPermissions, transaction, cancellationToken: cancellationToken);

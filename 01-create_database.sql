@@ -26,8 +26,8 @@ CREATE TABLE groups (
 );
 
 CREATE TABLE user_groups (    
-    user_id INT REFERENCES Users(Id) NOT NULL,
-    group_id INT REFERENCES Groups(Id) NOT NULL,
+    user_id INT REFERENCES Users(Id) ON DELETE CASCADE NOT NULL,
+    group_id INT REFERENCES Groups(Id) ON DELETE CASCADE NOT NULL ,
     inserted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     inserted_by TEXT NOT NULL,
     updated_at TIMESTAMPTZ NULL,
@@ -73,5 +73,12 @@ CREATE TABLE document_permissions (
  INSERT into user_groups(user_id, group_id, inserted_by) VALUES (1, 1, 'seed');
  
  
- 
+-- Stored Procedures
 
+
+CREATE OR REPLACE PROCEDURE delete_user (userid integer)
+LANGUAGE SQL
+AS $$
+  DELETE FROM document_permissions WHERE user_id = userid;
+  DELETE FROM users WHERE id = userid;
+$$;

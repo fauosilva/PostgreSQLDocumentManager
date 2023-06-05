@@ -23,8 +23,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
             this.dbDataSource = dbDataSource;
             this.authenticatedUserContext = authenticatedUserContext;
         }
-
-        //Todo: Use stored procedure to perform this check
+        
         public async Task<bool> CanDownloadAsync(int userId, int documentId, CancellationToken cancellationToken = default)
         {
             await using var connection = await dbDataSource.OpenConnectionAsync(cancellationToken);

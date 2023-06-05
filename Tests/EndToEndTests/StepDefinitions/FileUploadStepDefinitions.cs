@@ -104,7 +104,7 @@ namespace EndToEndTests.StepDefinitions
         }
 
         [Then(@"the created user should be able to download the file")]
-        public void ThenTheCreatedUserShouldBeAbleToDownloadTheFile(Table table)
+        public void ThenTheCreatedUserShouldBeAbleToDownloadTheFile(Table _)
         {
             var downloadStream = scenarioContext.Get<Stream>("downloadDocument");
             downloadStream.Should().NotBeNull();
@@ -120,7 +120,7 @@ namespace EndToEndTests.StepDefinitions
         }
 
         [Given(@"the created user was assigned to the created group")]
-        public async Task GivenTheCreatedUserWasAssignedToTheCreatedGroup(Table table)
+        public async Task GivenTheCreatedUserWasAssignedToTheCreatedGroup(Table _)
         {
             var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
             var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
@@ -128,7 +128,7 @@ namespace EndToEndTests.StepDefinitions
         }
 
         [Given(@"the created group was given access to the file")]
-        public async Task GivenTheCreatedGroupWasGivenAccessToTheFile(Table table)
+        public async Task GivenTheCreatedGroupWasGivenAccessToTheFile(Table _)
         {
             var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
             var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
