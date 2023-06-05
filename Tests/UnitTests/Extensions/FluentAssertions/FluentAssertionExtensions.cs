@@ -1,5 +1,4 @@
-﻿using ApplicationCore.Dtos.Responses;
-using ApplicationCore.Interfaces.Dtos;
+﻿using ApplicationCore.Interfaces.Dtos;
 using ApplicationCore.Interfaces.Entities;
 using FluentAssertions.Equivalency;
 

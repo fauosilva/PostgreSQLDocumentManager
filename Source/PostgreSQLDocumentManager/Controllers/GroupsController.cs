@@ -12,10 +12,10 @@ namespace PostgreSQLDocumentManager.Controllers
     [ApiController]
     public class GroupsController : ControllerBase
     {
-        private readonly ILogger<UsersController> logger;
+        private readonly ILogger<GroupsController> logger;
         private readonly IGroupService groupService;
 
-        public GroupsController(ILogger<UsersController> logger, IGroupService groupService)
+        public GroupsController(ILogger<GroupsController> logger, IGroupService groupService)
         {
             this.logger = logger;
             this.groupService = groupService;

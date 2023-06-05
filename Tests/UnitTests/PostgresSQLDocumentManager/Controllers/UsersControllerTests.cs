@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using PostgreSQLDocumentManager.Controllers;
+using UnitTests.Extensions;
 
 namespace UnitTests.PostgresSQLDocumentManager.Controllers
 {
@@ -18,25 +19,7 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
         public UsersControllerTests()
         {
             logger = NullLoggerFactory.Instance.CreateLogger<UsersController>();
-        }
-
-        //[Fact]
-        //public async Task GetUsers_ShouldReturnInternalServerError_WhenErrorOccuredOnServiceLayer()
-        //{
-        //    //Arrange
-        //    var cancellationToken = CancellationToken.None;            
-        //    var userService = new Mock<IUserService>();
-        //    userService.Setup(m => m.GetUsersAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new ServiceException("Sample"));
-        //    var controller = new UsersController(logger, userService.Object);
-
-        //    //Act            
-        //    IActionResult actionResult = await controller.GetUsers(cancellationToken);
-
-        //    //Assert
-        //    actionResult.Should().NotBeNull();            
-        //    actionResult.Should().BeOfType<StatusCodeResult>();
-        //    (actionResult as StatusCodeResult)?.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
-        //}
+        }       
 
         [Fact]
         public async Task GetUsers_ShouldReturnOkObjectResultWithEmptyList_WhenNoUsersExists()
@@ -119,7 +102,7 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
             actionResult.Should().NotBeNull();
             actionResult.Should().BeOfType<OkObjectResult>();
             var returnValue = (actionResult as OkObjectResult)?.Value;
-            AssertControllerReturn(controllerResponse, returnValue);
+            returnValue.AssertControllerReturn(controllerResponse);            
         }
 
         [Fact]
@@ -160,7 +143,7 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
             actionResult.Should().NotBeNull();
             actionResult.Should().BeOfType<OkObjectResult>();
             var returnValue = (actionResult as OkObjectResult)?.Value;
-            AssertControllerReturn(userServiceResponse, returnValue);
+            returnValue.AssertControllerReturn(userServiceResponse);
         }
 
         [Fact]
@@ -221,7 +204,7 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
             actionResult.Should().NotBeNull();
             actionResult.Should().BeOfType<OkObjectResult>();
             var returnValue = (actionResult as OkObjectResult)?.Value;
-            AssertControllerReturn(userServiceResponse, returnValue);
+            returnValue.AssertControllerReturn(userServiceResponse);
         }
 
         [Fact]
@@ -262,14 +245,6 @@ namespace UnitTests.PostgresSQLDocumentManager.Controllers
             //Assert
             actionResult.Should().NotBeNull();
             actionResult.Should().BeOfType<NoContentResult>();
-        }
-
-        private static void AssertControllerReturn<T>(T expectedResponse, object? returnValue) where T : class
-        {
-            returnValue.Should().BeAssignableTo<T>();
-            var response = returnValue as T;
-            response.Should().NotBeNull();
-            response.Should().Be(expectedResponse);
         }
     }
 }
