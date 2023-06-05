@@ -43,35 +43,48 @@ namespace ApplicationCore.Services
             try
             {
                 var existingDocument = await documentRepository.GetDocumentByNameDescriptionAndCategoryAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, cancellationToken);
-                if (existingDocument != null && existingDocument.Uploaded)
+                if (existingDocument != null)
                 {
-                    throw new ServiceException($"Unable to create document. Document with name: {fileUploadRequest.Name}," +
-                        $" category: {fileUploadRequest.Category}, description: {fileUploadRequest.Description} already exists.");
+                    if (existingDocument.Uploaded)
+                    {
+                        throw new ServiceException($"Unable to create document. Document with name: {fileUploadRequest.Name}," +
+                            $" category: {fileUploadRequest.Category}, description: {fileUploadRequest.Description} already exists.");
+                    }
+                    else
+                    {
+                        logger.LogInformation("File already on the database but upload flag is not set.");
+                        return await InternalUpdloadFileAsync(fileStream, contentType, fileUploadRequest, existingDocument, cancellationToken);
+                    }
                 }
 
                 logger.LogInformation("Adding document info into database");
                 var createdDocument = await documentRepository.AddAsync(fileUploadRequest.Name!, fileUploadRequest.Description!, fileUploadRequest.Category!, fileUploadRequest.GetKeyName(), cancellationToken: cancellationToken);
 
-                logger.LogInformation("Uploading file into file repository");
-                var uploadSuccess = await fileRepository.UploadFromStreamAsync(fileStream, contentType, fileUploadRequest.GetKeyName(),
-                    fileUploadRequest.Name!, fileUploadRequest.Category!, fileUploadRequest.Description!, cancellationToken);
-
-                if (!uploadSuccess)
-                {
-                    throw new ServiceException("Unable to upload file to storage.");
-                }
-
-                logger.LogInformation("Updating file uploaded information");
-                var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken)
-                    ?? throw new ServiceException("File was created and uploaded, uploaded flag was not set.");
-
-                return new CreateDocumentResponse(udpatedDocument);
+                return await InternalUpdloadFileAsync(fileStream, contentType, fileUploadRequest, createdDocument, cancellationToken);
             }
             catch (Exception ex)
             {
                 throw new ServiceException($"Unexpected issue while attempting upload file. Message: {ex.Message}", ex);
             }
 
+        }
+
+        private async Task<CreateDocumentResponse> InternalUpdloadFileAsync(Stream fileStream, string? contentType, FileUploadRequest fileUploadRequest, Document createdDocument, CancellationToken cancellationToken)
+        {
+            logger.LogInformation("Uploading file into file repository");
+            var uploadSuccess = await fileRepository.UploadFromStreamAsync(fileStream, contentType, fileUploadRequest.GetKeyName(),
+                fileUploadRequest.Name!, fileUploadRequest.Category!, fileUploadRequest.Description!, cancellationToken);
+
+            if (!uploadSuccess)
+            {
+                throw new ServiceException("Unable to upload file to storage.");
+            }
+
+            logger.LogInformation("Updating file uploaded information");
+            var udpatedDocument = await documentRepository.UpdateUploadedStatusAsync(createdDocument.Id, uploadSuccess, cancellationToken)
+                ?? throw new ServiceException("File was created and uploaded, uploaded flag was not set.");
+
+            return new CreateDocumentResponse(udpatedDocument);
         }
 
         public async Task<IEnumerable<DocumentResponse>> GetDocumentsAsync(CancellationToken cancellationToken = default)
