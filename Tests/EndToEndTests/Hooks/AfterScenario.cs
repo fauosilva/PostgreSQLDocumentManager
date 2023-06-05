@@ -9,18 +9,14 @@ namespace EndToEndTests.Hooks
     public class AfterScenario
     {
         private readonly ScenarioContext scenarioContext;
-        private readonly FeatureContext featureContext;
-        private RestApiHttpClient restApiHttpClient;
-        private NpgsqlDataSource npgsqlDataSource;
+        private readonly RestApiHttpClient restApiHttpClient;        
 
         public AfterScenario(ScenarioContext scenarioContext, FeatureContext featureContext)
         {
-            this.scenarioContext = scenarioContext;
-            this.featureContext = featureContext;            
+            this.scenarioContext = scenarioContext;        
             var testSettings = featureContext.Get<TestSettings>(BeforeFeature.TestSettings);
             var httpClient = featureContext.Get<HttpClient>(BeforeFeature.FeatureContextHttpClient);
-            restApiHttpClient = new RestApiHttpClient(httpClient, testSettings);
-            npgsqlDataSource = featureContext.Get<NpgsqlDataSource>(BeforeFeature.DataSource);
+            restApiHttpClient = new RestApiHttpClient(httpClient, testSettings);            
         }
 
         [AfterScenario("Cleanup")]
@@ -36,9 +32,15 @@ namespace EndToEndTests.Hooks
             scenarioContext.TryGetValue<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse, out var createDocumentResponse);
             if (createDocumentResponse != null)
             {
-                //var result = await restApiHttpClient.DeleteDocumentAsync(createDocumentResponse.Id);
-                //result.Should().BeTrue($"Unable to delete document with Id: {createDocumentResponse.Id}");
-            }            
+                //So far the API does not support document delete ;)
+            }
+
+            scenarioContext.TryGetValue<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse, out var createGroupResponse);
+            if (createGroupResponse != null)
+            {
+                var result = await restApiHttpClient.DeleteGroupAsync(createGroupResponse.Id);
+                result.Should().BeTrue($"Unable to delete group with Id: {createGroupResponse.Id}");
+            }
         }
 
     }

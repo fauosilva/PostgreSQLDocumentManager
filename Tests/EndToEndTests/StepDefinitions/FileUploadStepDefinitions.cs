@@ -1,3 +1,4 @@
+using ApplicationCore.Dtos.Requests;
 using ApplicationCore.Dtos.Responses;
 using EndToEndTests.Configuration;
 using EndToEndTests.Constants;
@@ -11,15 +12,12 @@ namespace EndToEndTests.StepDefinitions
     public class FileUploadStepDefinitions
     {
         private readonly ScenarioContext scenarioContext;
-        private readonly FeatureContext featureContext;
         private readonly RestApiHttpClient restApiHttpClient;
         private readonly NpgsqlDataSource npgsqlDataSource;
-
 
         public FileUploadStepDefinitions(ScenarioContext scenarioContext, FeatureContext featureContext)
         {
             this.scenarioContext = scenarioContext;
-            this.featureContext = featureContext;
             var testSettings = featureContext.Get<TestSettings>(BeforeFeature.TestSettings);
             var httpClient = featureContext.Get<HttpClient>(BeforeFeature.FeatureContextHttpClient);
             restApiHttpClient = new RestApiHttpClient(httpClient, testSettings);
@@ -81,7 +79,7 @@ namespace EndToEndTests.StepDefinitions
 
             using var connection = npgsqlDataSource.OpenConnection();
             using var cmd = new NpgsqlCommand("SELECT 1 FROM users WHERE id = @p1", connection);
-            cmd.Parameters.AddWithValue("p1",  createdUser.Id);           
+            cmd.Parameters.AddWithValue("p1", createdUser.Id);
             int? returnValue = (int?)cmd.ExecuteScalar();
             returnValue.Should().Be(1);
         }
@@ -114,40 +112,82 @@ namespace EndToEndTests.StepDefinitions
         }
 
         [Given(@"and a group with name '([^']*)' was created")]
-        public void GivenAndAGroupWithNameWasCreated(string sample)
+        public async Task GivenAndAGroupWithNameWasCreated(string sample)
         {
-            throw new PendingStepException();
+            var createGroupRequest = new CreateGroupRequest() { Name = sample };
+            var createGroupResponse = await restApiHttpClient.CreateGroupAsync(createGroupRequest);
+            scenarioContext.Add(ScenarioContextConstants.CreateGroupResponse, createGroupResponse);
         }
 
         [Given(@"the created user was assigned to the created group")]
-        public void GivenTheCreatedUserWasAssignedToTheCreatedGroup(Table table)
+        public async Task GivenTheCreatedUserWasAssignedToTheCreatedGroup(Table table)
         {
-            throw new PendingStepException();
+            var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
+            var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
+            await restApiHttpClient.AddUserToGroupAsync(createdGroup.Id, createdUser.Id);
         }
 
         [Given(@"the created group was given access to the file")]
-        public void GivenTheCreatedGroupWasGivenAccessToTheFile(Table table)
+        public async Task GivenTheCreatedGroupWasGivenAccessToTheFile(Table table)
         {
-            throw new PendingStepException();
+            var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
+            var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
+            await restApiHttpClient.AddGroupPermissionAsync(createdDocument.Id, createdGroup.Id);
         }
 
         [Then(@"the created group should exist on the database")]
         public void ThenTheCreatedGroupShouldExistOnTheDatabase()
         {
-            throw new PendingStepException();
+            var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
+
+            using var connection = npgsqlDataSource.OpenConnection();
+            using var cmd = new NpgsqlCommand("SELECT 1 FROM groups WHERE id = @p1", connection)
+            {
+                Parameters =
+                {
+                    new("p1", createdGroup.Id)
+                }
+            };
+            int? returnValue = (int?)cmd.ExecuteScalar();
+            returnValue.Should().Be(1);
         }
 
         [Then(@"the user should be associated with the group on the database")]
         public void ThenTheUserShouldBeAssociatedWithTheGroupOnTheDatabase()
         {
-            throw new PendingStepException();
+            var createdUser = scenarioContext.Get<CreateUserResponse>(ScenarioContextConstants.CreateUserResponse);
+            var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
+
+            using var connection = npgsqlDataSource.OpenConnection();
+            using var cmd = new NpgsqlCommand("SELECT 1 FROM user_groups WHERE user_id = @p1 AND group_id = @p2", connection)
+            {
+                Parameters =
+                {
+                    new("p1", createdUser.Id),
+                    new("p2", createdGroup.Id)
+                }
+            };
+            int? returnValue = (int?)cmd.ExecuteScalar();
+            returnValue.Should().Be(1);
         }
 
         [Then(@"the created group should have access granted to the file on the database")]
         public void ThenTheCreatedGroupShouldHaveAccessGrantedToTheFileOnTheDatabase()
         {
-            throw new PendingStepException();
-        }
+            var createdDocument = scenarioContext.Get<CreateDocumentResponse>(ScenarioContextConstants.CreateDocumentResponse);
+            var createdGroup = scenarioContext.Get<CreateGroupResponse>(ScenarioContextConstants.CreateGroupResponse);
 
+            using var connection = npgsqlDataSource.OpenConnection();
+            using var cmd = new NpgsqlCommand("SELECT 1 FROM document_permissions WHERE document_id = @p1 AND group_id = @p2", connection)
+            {
+                Parameters =
+                {
+                    new("p1", createdDocument.Id),
+                    new("p2", createdGroup.Id)
+                }
+            };
+            int? returnValue = (int?)cmd.ExecuteScalar();
+            returnValue.Should().Be(1);
+        }
     }
 }

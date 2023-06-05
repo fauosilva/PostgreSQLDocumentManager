@@ -170,6 +170,123 @@ this.ScenarioInitialize(scenarioInfo);
             this.ScenarioCleanup();
         }
         
+        [Xunit.SkippableFactAttribute(DisplayName="User should be able to download file after being set download permissions through" +
+            " a group")]
+        [Xunit.TraitAttribute("FeatureTitle", "FileUpload")]
+        [Xunit.TraitAttribute("Description", "User should be able to download file after being set download permissions through" +
+            " a group")]
+        [Xunit.TraitAttribute("Category", "Cleanup")]
+        public virtual void UserShouldBeAbleToDownloadFileAfterBeingSetDownloadPermissionsThroughAGroup()
+        {
+            string[] tagsOfScenario = new string[] {
+                    "Cleanup"};
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("User should be able to download file after being set download permissions through" +
+                    " a group", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 24
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
+                            "userName",
+                            "userPassword",
+                            "role"});
+                table5.AddRow(new string[] {
+                            "testUser1",
+                            "testUserPassword",
+                            "User"});
+#line 25
+ testRunner.And("an user with role was created", ((string)(null)), table5, "And ");
+#line hidden
+#line 28
+ testRunner.And("and a group with name \'sample\' was created", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                            "groupName",
+                            "userName"});
+                table6.AddRow(new string[] {
+                            "sample",
+                            "testAdmin"});
+#line 29
+ testRunner.And("the created user was assigned to the created group", ((string)(null)), table6, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+                            "userName",
+                            "userPassword"});
+                table7.AddRow(new string[] {
+                            "testUser1",
+                            "testUserPassword"});
+#line 32
+ testRunner.And("a JWT token was generated for the created user with their credentials", ((string)(null)), table7, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
+                            "fileName",
+                            "name",
+                            "description",
+                            "category",
+                            "mimeType"});
+                table8.AddRow(new string[] {
+                            "sample2.png",
+                            "sample2",
+                            "testSampleDescription",
+                            "sampleCategory",
+                            "image/png"});
+#line 35
+ testRunner.And("a file was uploaded by the Admin user", ((string)(null)), table8, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
+                            "fileName",
+                            "groupName"});
+                table9.AddRow(new string[] {
+                            "sample2.png",
+                            "sample"});
+#line 38
+ testRunner.And("the created group was given access to the file", ((string)(null)), table9, "And ");
+#line hidden
+#line 41
+ testRunner.When("the created user attempts to download the file", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
+                            "fileName",
+                            "mimeType"});
+                table10.AddRow(new string[] {
+                            "sample2.png",
+                            "image/png"});
+#line 42
+ testRunner.Then("the created user should be able to download the file", ((string)(null)), table10, "Then ");
+#line hidden
+#line 45
+ testRunner.And("the created user should exist on the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 46
+ testRunner.And("the created group should exist on the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 47
+ testRunner.And("the user should be associated with the group on the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 48
+ testRunner.And("the created group should have access granted to the file on the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : System.IDisposable

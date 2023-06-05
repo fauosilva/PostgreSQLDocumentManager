@@ -28,6 +28,12 @@ namespace EndToEndTests
         {
             return await SendJsonPostAsync<CreateUserResponse>("/api/v1/users", createUserRequest, await GetAdminJwtToken());
         }
+
+        public async Task<CreateGroupResponse> CreateGroupAsync(CreateGroupRequest createGroupRequest)
+        {
+            return await SendJsonPostAsync<CreateGroupResponse>("/api/v1/groups", createGroupRequest, await GetAdminJwtToken());
+        }
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             return await SendDeleteAsync("/api/v1/users", id, await GetAdminJwtToken());
@@ -38,14 +44,31 @@ namespace EndToEndTests
             return await SendDeleteAsync("/api/v1/documents", id, await GetAdminJwtToken());
         }
 
+        public async Task<bool> DeleteGroupAsync(int id)
+        {
+            return await SendDeleteAsync("/api/v1/groups", id, await GetAdminJwtToken());
+        }
+
         public async Task<CreateDocumentResponse> FileUploadAsync(MultipartFormDataContent fileUploadRequest)
         {
             return await SendPostAsync<CreateDocumentResponse>("/api/v1/documents", fileUploadRequest, await GetAdminJwtToken());
         }
 
+        public async Task<GroupResponse> AddUserToGroupAsync(int groupId, int userId)
+        {
+            var request = new UserGroupRequest() { UserId = userId };
+            return await SendJsonPostAsync<GroupResponse>($"/api/v1/groups/{groupId}/users", request, await GetAdminJwtToken());
+        }
+
         public async Task<CreateDocumentResponse> AddUserPermissionAsync(int documentId, int userId)
         {
             var request = new PermissionRequest() { UserId = userId };
+            return await SendJsonPostAsync<CreateDocumentResponse>($"/api/v1/documents/{documentId}/permissions", request, await GetAdminJwtToken());
+        }
+
+        public async Task<CreateDocumentResponse> AddGroupPermissionAsync(int documentId, int groupId)
+        {
+            var request = new PermissionRequest() { GroupId = groupId };
             return await SendJsonPostAsync<CreateDocumentResponse>($"/api/v1/documents/{documentId}/permissions", request, await GetAdminJwtToken());
         }
 
@@ -68,7 +91,6 @@ namespace EndToEndTests
             }
             return AdminJwtToken;
         }
-
 
         private async Task<Stream> GetFileAsync(string url, string? jwtToken = null)
         {
