@@ -67,8 +67,7 @@ namespace Infrastructure.Persistence.Dapper.PostgreSQL
 
                 var deletedGroupAssociations = await ExecuteWithRetryOnTransientErrorAsync(() => connection.ExecuteAsync(commandUserGroups), cancellationToken);
                 logger.LogDebug("Number of associations deleted {affectedRecords}", deletedGroupAssociations);
-
-                //TODO: Create index
+                
                 string sqlPermissions = "DELETE FROM document_permissions WHERE user_id = @id";
                 var parametersPermissions = new { id };
                 var commandPermissions = new CommandDefinition(sqlPermissions, parametersPermissions, transaction, cancellationToken: cancellationToken);

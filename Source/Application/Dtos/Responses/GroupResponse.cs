@@ -12,11 +12,11 @@ namespace ApplicationCore.Dtos.Responses
             InsertedBy = group.Inserted_By;
             UpdatedAt = group.Updated_At;
             UpdatedBy = group.Updated_By;
-            Users = group.Users;
+            Users =  group.Users?.Select(u => u.User_Id);
         }
 
         public string Name { get; set; }
 
-        public List<UserGroup>? Users { get; set; }
+        public IEnumerable<int>? Users { get; set; }
     }
 }

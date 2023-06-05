@@ -16,7 +16,14 @@ namespace ApplicationCore.Dtos.Responses
             InsertedBy = document.Inserted_By;
             UpdatedAt = document.Updated_At;
             UpdatedBy = document.Updated_By;
-            Permissions = document.Permissions;
+            Permissions = document.Permissions?.Select(p =>
+            {
+                if (p != null)
+                {
+                    return new CreatePermissionResponse(p);
+                }
+                return null;
+            });
         }
 
         public string Name { get; set; }
@@ -24,6 +31,6 @@ namespace ApplicationCore.Dtos.Responses
         public string Description { get; set; }
         public string Category { get; set; }
         public bool Uploaded { get; set; }
-        public IEnumerable<DocumentPermission>? Permissions { get; set; }
+        public IEnumerable<CreatePermissionResponse?>? Permissions { get; set; }
     }
 }
