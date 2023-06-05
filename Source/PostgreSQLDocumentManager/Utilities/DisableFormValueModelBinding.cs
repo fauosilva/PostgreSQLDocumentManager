@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PostgreSQLDocumentManager.Utilities
 {
+    [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
     {

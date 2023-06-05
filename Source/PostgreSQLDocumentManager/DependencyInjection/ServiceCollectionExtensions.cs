@@ -12,10 +12,12 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using PostgreSQLDocumentManager.Configuration;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace PostgreSQLDocumentManager.DependencyInjection
 {
+    [ExcludeFromCodeCoverage]
     public static class ServiceCollectionExtensions
     {
         public static void AddServices(this IServiceCollection serviceCollection)

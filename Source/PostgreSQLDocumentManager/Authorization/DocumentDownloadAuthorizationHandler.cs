@@ -1,9 +1,11 @@
 ﻿using ApplicationCore.Interfaces.Authentication;
 using ApplicationCore.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PostgreSQLDocumentManager.Authorization
 {
+    [ExcludeFromCodeCoverage]
     public class DocumentDownloadAuthorizationHandler : AuthorizationHandler<UserGroupRequirement, int>
     {
         private readonly IDocumentPermissionRepository documentPermissionRepository;
